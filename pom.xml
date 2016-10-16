@@ -63,7 +63,7 @@
                                 <argument>java -jar ${basedir}/target/Trabalho1-1.jar</argument>
                                 <argument>${basedir}/tmp</argument>
                                 <argument>gcc</argument>
-                                <argument>${basedir}/casosDeTesteT1</argument>
+                                <argument>${basedir}/corretor/casosDeTesteT1</argument>
                                 <argument>""</argument>
                                 <!-- Opções: sintatico, semantico, gerador, tudo-->
                                 <argument>sintatico</argument>
