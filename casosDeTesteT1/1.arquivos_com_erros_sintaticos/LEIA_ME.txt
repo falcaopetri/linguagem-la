@@ -1,0 +1,442 @@
+Casos de Teste - arquivos com erros sintáticos
+
+1-algoritmo_2-2_apostila_LA_1_erro_linha_3_acusado_linha_10.txt
+ERRO: 
+	ausência da palavra reservada "algoritmo"
+SAÍDA:
+	Linha 10: erro sintatico proximo a leia
+	Fim da compilacao
+
+2-algoritmo_2-2_apostila_LA_1_erro_linha_14.txt
+Obs: Deve acusar erro na última linha lida do arquivo e apontar como token encontrado, por padrão, EOF como indicador de fim de arquivo
+ERRO:
+	ausência da palavra reservada "fim_agoritmo"
+SAÍDA:
+	Linha 14: erro sintatico proximo a EOF
+	Fim da compilacao
+
+3-algoritmo_2-2_apostila_LA_1_erro_linha_5.txt
+ERRO:
+	ausência do símbolo reservado ":"
+SAÍDA:
+	Linha 5: erro sintatico proximo a literal
+	Fim da compilacao
+
+4-algoritmo_2-2_apostila_LA_1_erro_linha_10.txt
+ERRO:
+	ausência do símbolo reservado "("
+SAÍDA:
+	Linha 10: erro sintatico proximo a nome
+	Fim da compilacao
+
+5-algoritmo_2-2_apostila_LA_1_erro_linha_11_acusado_linha_14.txt
+ERRO:
+	ausência do símbolo reservado ")"
+SAÍDA:
+	Linha 14: erro sintatico proximo a escreva
+	Fim da compilacao
+
+6-algoritmo_2-2_apostila_LA_1_erro_linha_14.txt
+ERRO:
+	ausência de Primeiros de <expressao>
+SAÍDA:
+	Linha 14: erro sintatico proximo a )
+	Fim da compilacao
+
+7-algoritmo_2-3_apostila_LA_1_erro_linha_9.txt
+ERRO:
+	ausência de Primeiros de <identificador>
+SAÍDA:
+	Linha 9: erro sintatico proximo a ,
+	Fim da compilacao
+
+8-algoritmo_2-3_apostila_LA_1_erro_linha_12.txt
+ERRO:
+	ausência do símbolo reservado ")" pois ao remover o operador, o que se espera é fechar ')'
+SAÍDA:
+	Linha 12: erro sintatico proximo a abastecimento2
+	Fim da compilacao
+
+9-algoritmo_2-4_apostila_LA_1_erro_linha_13_acusado_linha_16.txt
+ERRO:
+	ausência do símbolo reservado ")"
+SAÍDA:
+	Linha 16: erro sintatico proximo a escreva
+	Fim da compilacao
+
+10-algoritmo_2-4_apostila_LA_1_erro_linha_16.txt
+ERRO:
+	erro léxico de símbolo '"' não identificado, pois trata-se de uma cadeia de caracteres que foi aberta mas não foi fechada
+SAÍDA:
+	Linha 16: " - simbolo nao identificado
+	Fim da compilacao
+
+11-algoritmo_3-1_apostila_LA_1_erro_linha_6_acusado_linha_9.txt
+ERRO:
+	ausência de Primeiros de <tipo>
+SAÍDA:
+	Linha 9: erro sintatico proximo a leia
+	Fim da compilacao
+
+12-algoritmo_3-1_apostila_LA_1_erro_linha_13.txt
+ERRO:
+	ausência de Primeiros de <chamada_atribuicao>
+SAÍDA:
+	Linha 13: erro sintatico proximo a -
+	Fim da compilacao
+
+13-algoritmo_3-1_apostila_LA_1_erro_linha_5.txt
+ERRO:
+	erro léxico de símbolo '@' não identificado
+SAÍDA:
+	Linha 5: @ - simbolo nao identificado
+	Fim da compilacao
+
+14-algoritmo_3-2_apostila_LA_1_erro_linha_15.txt
+Obs: Deve acusar o erro na linha do comentário que não foi fechado ou na linha seguinte. Isso depende da implementação que adotaram. Nesse caso de teste estou considerando que o erro será acusado na linha seguinte, mas ambos serão considerados corretos.
+ERRO:
+	erro léxico de comentário não fechado
+SAÍDA:
+	Linha 15: comentario nao fechado
+	Fim da compilacao
+	
+15-algoritmo_3-3_apostila_LA_1_erro_linha_21.txt
+ERRO:
+	ausência do símbolo reservado ")" pois ao remover o operador o que se espera é fechar ')'
+SAÍDA:
+	Linha 21: erro sintatico proximo a lado2
+	Fim da compilacao
+
+16-algoritmo_3-3_apostila_LA_1_erro_linha_11.txt
+ERRO:
+	ausência de Primeiros de <identificador>
+SAÍDA:
+	Linha 11: erro sintatico proximo a )
+	Fim da compilacao
+
+17-algoritmo_3-3_apostila_LA_1_erro_linha_15.txt
+ERRO:
+	ausência de Primeiros de <chamada_atribuicao>
+SAÍDA:
+	Linha 15: erro sintatico proximo a <
+	Fim da compilacao
+
+18-algoritmo_3-3_apostila_LA_1_erro_linha_21.txt
+ERRO:
+	ausência do símbolo reservado ")" pois ao remover o operador a opção que resta é fechar ')'
+SAÍDA:
+	Linha 21: erro sintatico proximo a lado1
+	Fim da compilacao
+
+19-algoritmo_4-5_apostila_LA_1_erro_linha_29.txt
+Obs: A mensagem de erro deve imprimir a cadeia literal (token atual) entre aspas, pois esse é o valor (cadeia) do token atual. As aspas fazem parte da cadeia literal.
+ERRO:
+	ausência de Primeiros de <cmd>
+SAÍDA:
+	Linha 29: erro sintatico proximo a "Houve colisao?"
+	Fim da compilacao
+
+20-algoritmo_5-1_apostila_LA_1_erro_linha_15_acusado_linha_16.txt
+ERRO:
+	ausência da palavra reservada "entao"
+SAÍDA:
+	Linha 16: erro sintatico proximo a escreva
+	Fim da compilacao
+
+21-algoritmo_5-1_apostila_LA_1_erro_linha_19_acusado_linha_20.txt
+ERRO:
+	ausência da palavra reservada "fim_se"
+SAÍDA:
+	Linha 20: erro sintatico proximo a fim_algoritmo
+	Fim da compilacao
+
+22-algoritmo_5-3_apostila_LA_1_erro_linha_26_acusado_linha_27.txt
+ERRO:
+	ausência do símbolo reservado ")"
+SAÍDA:
+	Linha 27: erro sintatico proximo a fim_se
+	Fim da compilacao
+
+23-algoritmo_5-4_apostila_LA_1_erro_linha_10_acusado_linha_11.txt
+Obs: Neste caso a mensagem de erro deve-se imprimir a cadeia associada ao token atual (NUM_INT), ou seja, o 0.
+ERRO:
+	ausência da palavra reservada "seja"
+SAÍDA:
+	Linha 11: erro sintatico proximo a 0
+	Fim da compilacao
+
+24-algoritmo_5-4_apostila_LA_1_erro_linha_11.txt
+ERRO:
+	ausência do símbolo reservado ":" no comando <selecao>
+SAÍDA:
+	Linha 11: erro sintatico proximo a escreva
+	Fim da compilacao
+
+25-algoritmo_5-4_apostila_LA_1_erro_linha_15.txt
+ERRO:
+	ausência de número inteiro para intervalo válido ou erro de digitação (o certo seria "..") no comando <selecao>
+Obs: Veja que a <selecao> no comando 'caso' é feita apenas com números inteiros e, portanto, 19.120 que é número real não é um token válido nesse contexto.
+SAÍDA:
+	Linha 15: erro sintatico proximo a 19.120
+	Fim da compilacao
+
+26-algoritmo_5-4_apostila_LA_1_erro_linha_13.txt
+ERRO:
+	ausência de número inteiro (NUM_INT) em <intervalo_opcional> onde só pode ocorrer número inteiro
+SAÍDA:
+	Linha 13: erro sintatico proximo a abc
+	Fim da compilacao
+
+27-algoritmo_5-4_apostila_LA_1_erro_linha_18_acusado_linha_19.txt
+ERRO:
+	ausência da palavra reservada "fim_caso"
+SAÍDA:
+	Linha 19: erro sintatico proximo a fim_algoritmo
+	Fim da compilacao
+
+28-algoritmo_6-1_apostila_LA_1_erro_linha_8.txt
+ERRO:
+	ausência de identificador (IDENT) no início do comando 'para-ate-faca'
+SAÍDA:
+	Linha 8: erro sintatico proximo a <-
+	Fim da compilacao
+
+29-algoritmo_6-1_apostila_LA_1_erro_linha_8.txt
+ERRO:
+	ausência do símbolo reservado "<-" no comando 'para-ate-faca'
+SAÍDA:
+	Linha 8: erro sintatico proximo a <
+	Fim da compilacao
+
+30-algoritmo_6-1_apostila_LA_1_erro_linha_8.txt
+ERRO:
+	ausência da palavra reservada "ate" no comando 'para-ate-faca'
+SAÍDA:
+	Linha 8: erro sintatico proximo a 40
+	Fim da compilacao
+
+31-algoritmo_6-1_apostila_LA_1_erro_linha_8_acusado_linha_9.txt
+ERRO:
+	ausência da palavra reservada "faca" do 'para-ate-faca'
+SAÍDA:
+	Linha 9: erro sintatico proximo a fahrenheit
+	Fim da compilacao
+
+32-algoritmo_6-1_apostila_LA_1_erro_linha_11_acusado_linha_12.txt
+ERRO:
+	ausência da palavra reservada "fim_para"
+SAÍDA:
+	Linha 12: erro sintatico proximo a fim_algoritmo
+	Fim da compilacao
+
+33-algoritmo_6-2_apostila_LA_1_erro_linha_10_acusado_linha_12.txt
+ERRO:
+	ausência da palavra reservada "faca" do enquanto-faca
+SAÍDA:
+	Linha 12: erro sintatico proximo a escreva
+	Fim da compilacao
+
+34-algoritmo_6-2_apostila_LA_1_erro_linha_16_acusado_linha_21.txt
+ERRO:
+	ausência da palavra reservada "fim_enquanto"
+SAÍDA:
+	Linha 21: erro sintatico proximo a fim_algoritmo
+	Fim da compilacao
+
+35-algoritmo_6-4_apostila_LA_1_erro_linha_16_acusado_linha_17.txt
+ERRO:
+	ausência da palavra reservada "ate" do 'faca-ate'
+SAÍDA:
+	Linha 17: erro sintatico proximo a fim_algoritmo
+	Fim da compilacao
+
+36-algoritmo_6-4_apostila_LA_1_erro_linha_16.txt
+ERRO:
+	ausência de Primeiros de <expressao>
+SAÍDA:
+	Linha 16: erro sintatico proximo a >
+	Fim da compilacao
+
+37-algoritmo_6-5_apostila_LA_1_erro_linha_18.txt
+ERRO:
+	ausência de Primeiros de <fator>
+SAÍDA:
+	Linha 18: erro sintatico proximo a /
+	Fim da compilacao
+
+38-algoritmo_6-6_apostila_LA_1_erro_linha_23.txt
+ERRO:
+	ausência de Primeiros de <exp_aritmetica>
+SAÍDA:
+	Linha 23: erro sintatico proximo a /
+	Fim da compilacao
+
+39-algoritmo_6-9_apostila_LA_1_erro_linha_30.txt
+ERRO:
+	erro léxico de símbolo desconhecido '|'
+SAÍDA:
+	Linha 30: | - simbolo nao identificado
+	Fim da compilacao
+
+40-algoritmo_6-10_apostila_LA_1_erro_linha_26_acusado_linha_27.txt
+ERRO:
+	ausência do símbolo reservado ")"
+SAÍDA:
+	Linha 27: erro sintatico proximo a fim_para
+	Fim da compilacao
+
+41-algoritmo_7-1_apostila_LA_1_erro_linha_6_acusado_linha_7.txt
+ERRO:
+	ausência de Primeiros de <tipo_basico_ident>
+SAÍDA:
+	Linha 7: erro sintatico proximo a declare
+	Fim da compilacao
+
+42-algoritmo_7-1_apostila_LA_1_erro_linha_10.txt
+ERRO:
+	ausência de identificador (IDENT) após o '&'
+SAÍDA:
+	Linha 10: erro sintatico proximo a 1
+	Fim da compilacao
+
+43-algoritmo_7-2_apostila_LA_1_erro_linha_14.txt
+ERRO:
+	erro léxico de símbolo '!' não identificado
+SAÍDA:
+	Linha 14: ! - simbolo nao identificado
+	Fim da compilacao
+
+44-algoritmo_7-3_apostila_LA_1_erro_linha_27.txt
+ERRO:
+	ausência do símbolo reservado "<-" na atribuição de valor a ponteiro
+SAÍDA:
+	Linha 27: erro sintatico proximo a <
+	Fim da compilacao
+
+45-algoritmo_8-1_apostila_LA_1_erro_linha_6.txt
+ERRO:
+	ausência de Primeiros de <variavel>
+SAÍDA:
+	Linha 6: erro sintatico proximo a ,
+	Fim da compilacao
+
+46-algoritmo_8-1_apostila_LA_1_erro_linha_7_acusado_linha_8.txt
+ERRO:
+	ausência da palavra reservada "fim_registro"
+SAÍDA:
+	Linha 8: erro sintatico proximo a declare
+	Fim da compilacao
+
+47-algoritmo_8-1_apostila_LA_1_erro_linha_18.txt
+ERRO:
+	ausência de identificador (IDENT) após o '.'
+SAÍDA:
+	Linha 18: erro sintatico proximo a ,
+	Fim da compilacao
+
+48-algoritmo_8-2_apostila_LA_1_erro_linha_34.txt
+ERRO:
+	ausência de identificador (IDENT) após o '.'
+SAÍDA:
+	Linha 34: erro sintatico proximo a 34
+	Fim da compilacao
+
+49-algoritmo_9-2_apostila_LA_1_erro_linha_8.txt
+ERRO:
+	ausência de identificador (IDENT) após a palavra reservada "procedimento" em <declaracao_global>
+SAÍDA:
+	Linha 8: erro sintatico proximo a (
+	Fim da compilacao
+
+50-algoritmo_9-2_apostila_LA_1_erro_linha_8.txt
+ERRO:
+	ausência do símbolo reservado "(" em <declaracao_global>
+SAÍDA:
+	Linha 8: erro sintatico proximo a var
+	Fim da compilacao
+
+51-algoritmo_9-2_apostila_LA_1_erro_linha_8.txt
+ERRO:
+	ausência do símbolo reservado ":" antes do tipo do parâmetro em <declaracao_global>
+SAÍDA:
+	Linha 8: erro sintatico proximo a tRacional
+	Fim da compilacao
+
+52-algoritmo_9-2_apostila_LA_1_erro_linha_8.txt
+ERRO:
+	ausência do símbolo reservado ")" em <declaracao_global>
+SAÍDA:
+	Linha 8: erro sintatico proximo a ]
+	Fim da compilacao
+
+53-algoritmo_9-2_apostila_LA_1_erro_linha_26_acusado_linha_28.txt
+ERRO:
+	ausência da palavra reservada "fim_procedimento"
+SAÍDA:
+	Linha 28: erro sintatico proximo a algoritmo
+	Fim da compilacao
+
+54-algoritmo_9-4_apostila_LA_1_erro_linha_3.txt
+ERRO:
+	ausência de identificador (IDENT) após a palavra reservada "funcao" em <declaracao_global>
+SAÍDA:
+	Linha 3: erro sintatico proximo a (
+	Fim da compilacao
+
+55-algoritmo_9-4_apostila_LA_1_erro_linha_21_acusado_linha_23.txt
+ERRO:
+	ausência da palavra reservada "fim_funcao"
+SAÍDA:
+	Linha 23: erro sintatico proximo a funcao
+	Fim da compilacao
+
+56-algoritmo_10-2_apostila_LA_1_erro_linha_5.txt
+ERRO:
+	ausência de identificador (IDENT) após a palavra reservada "constante" em <declaracao_local>
+SAÍDA:
+	Linha 5: erro sintatico proximo a :
+	Fim da compilacao
+
+57-algoritmo_10-2_apostila_LA_1_erro_linha_5.txt
+ERRO:
+	ausência do símbolo reservado ":" na declaração de constante em <declaracao_local>
+SAÍDA:
+	Linha 5: erro sintatico proximo a inteiro
+	Fim da compilacao
+
+58-algoritmo_10-2_apostila_LA_1_erro_linha_5.txt
+ERRO:
+	ausência do símbolo reservado "=" na declaração de constante em <declaracao_local>
+SAÍDA:
+	Linha 5: erro sintatico proximo a 40
+	Fim da compilacao
+
+59-algoritmo_10-2_apostila_LA_1_erro_linha_5.txt
+ERRO:
+	ausência de Primeiros de <valor_constante> na declaração de constante em <declaracao_local>	
+SAÍDA:
+	Linha 5: erro sintatico proximo a abc
+	Fim da compilacao
+
+60-algoritmo_10-4_apostila_LA_1_erro_linha_3.txt
+ERRO:
+	ausência de Primeiros de <tipo_basico> na declaração de constante em <declaracao_local>
+SAÍDA:
+	Linha 3: erro sintatico proximo a intero
+	Fim da compilacao
+
+61-algoritmo_10-4_apostila_LA_1_erro_linha_5.txt
+ERRO:
+	ausência de identificador (IDENT) após a palavra reservada "tipo" em <declaracao_local>
+SAÍDA:
+	Linha 5: erro sintatico proximo a :
+	Fim da compilacao
+
+62-algoritmo_10-4_apostila_LA_1_erro_linha_5.txt
+ERRO:
+	ausência do símbolo reservado ":" na declaração de tipo em <declaracao_local>
+SAÍDA:
+	Linha 5: erro sintatico proximo a registro
+	Fim da compilacao
+
+

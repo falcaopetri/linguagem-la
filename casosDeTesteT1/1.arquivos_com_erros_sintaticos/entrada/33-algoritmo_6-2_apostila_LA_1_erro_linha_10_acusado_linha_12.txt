@@ -1,0 +1,21 @@
+{ algoritmo que apresenta uma saudação para alguns nomes }
+
+algoritmo
+	declare nome: literal
+
+	{ primeiro nome a ser lido }
+	leia(nome)
+
+	{ repetição que termina quando o nome for “fim” }
+	enquanto nome <> "fim" 
+		{ escreve a saudação }
+		escreva("Ola,", nome, ", como vai?")
+
+		{ leitura do próximo nome }
+		leia(nome)
+	fim_enquanto
+
+	{ despedida }
+	escreva("Nao ha mais ninguem? Entao, tchau!")
+
+fim_algoritmo

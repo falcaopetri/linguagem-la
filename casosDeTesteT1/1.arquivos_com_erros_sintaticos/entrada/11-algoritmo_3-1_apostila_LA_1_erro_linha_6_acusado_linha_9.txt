@@ -1,0 +1,22 @@
+{ apresentar, para uma conta de lanchonete, o valor total da conta, o valor pago e o troco devolvido, dados o total consumido de bebidas e alimentos, além de se saber que a porcentagem do garçom é 10% }
+
+algoritmo
+	declare totalBebidas, totalAlimentos,
+		valorPago, troco,
+		porcentagemGarcom: 
+
+	{ obtenção dos dados necessários }
+	leia(totalBebidas, totalAlimentos, valorPago)
+
+	{ cálculos necessários }
+	porcentagemGarcom <- (totalBebidas + totalAlimentos) * 10/100.0 { 10% }
+	troco <- valorPago - (totalBebidas + totalAlimentos + porcentagemGarcom)
+
+	{ apresentação dos resultados }
+	escreva("Valor da conta:",
+	totalBebidas + totalAlimentos + porcentagemGarcom)
+
+	escreva("Valor pago:", valorPago)
+	escreva("Troco:", troco)
+
+fim_algoritmo

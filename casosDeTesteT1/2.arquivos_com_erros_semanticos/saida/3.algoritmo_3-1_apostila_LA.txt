@@ -1,0 +1,3 @@
+Linha 6: identificador troco ja declarado anteriormente
+Linha 17: identificador totalAlimento nao declarado
+Fim da compilacao

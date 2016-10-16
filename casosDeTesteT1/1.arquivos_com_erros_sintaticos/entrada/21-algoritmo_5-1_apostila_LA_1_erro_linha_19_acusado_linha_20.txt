@@ -1,0 +1,20 @@
+{ cálculo da média final de um aluno, feita pela média aritmética de duas provas, e escrever mensagem indicando aprovação ou reprovação }
+
+algoritmo
+	declare notaProva1, notaProva2, media: real
+
+	{ leitura das notas }
+	leia(notaProva1, notaProva2)
+
+	{ cálculo da média }
+	media <- (notaProva1 + notaProva2)/2
+
+	{ resultados }
+	escreva(media)
+
+	se media >= 6 entao
+		escreva("Aprovado :)...")
+	senao
+		escreva("Reprovado :(...")
+	
+fim_algoritmo

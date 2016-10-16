@@ -1,0 +1,2 @@
+Linha 23: erro sintatico proximo a funcao
+Fim da compilacao

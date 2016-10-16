@@ -1,0 +1,15 @@
+{ determinar, em R3, qual de dois pontos é o mais próximo da origem }
+
+algoritmo
+	declare
+		ponto1, ponto2: registro
+								x, y, z: real
+							fim_registro
+
+	ponto1.x <- "teste"
+
+	{ leitura das coordenadas dos pontos }
+	leia(ponto1.x, ponto1.y, ponto1.z)
+	leia(ponto2.x, ponto2.y, ponto2.z)
+	
+fim_algoritmo

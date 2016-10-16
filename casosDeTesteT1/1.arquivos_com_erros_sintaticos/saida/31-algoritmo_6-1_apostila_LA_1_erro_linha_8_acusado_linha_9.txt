@@ -1,0 +1,2 @@
+Linha 9: erro sintatico proximo a fahrenheit
+Fim da compilacao

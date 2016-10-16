@@ -1,0 +1,2 @@
+Linha 5: erro sintatico proximo a 40
+Fim da compilacao

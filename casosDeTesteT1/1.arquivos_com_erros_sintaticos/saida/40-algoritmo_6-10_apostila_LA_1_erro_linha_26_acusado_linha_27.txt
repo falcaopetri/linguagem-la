@@ -1,0 +1,2 @@
+Linha 27: erro sintatico proximo a fim_para
+Fim da compilacao

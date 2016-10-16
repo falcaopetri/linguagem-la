@@ -1,0 +1,17 @@
+{ geração de uma tabela de conversão de graus Celsius para Fahrenheit de 0 a 10 (inclusive), de 0,5 em 0,5. }
+
+algoritmo
+	declare celsius, fahrenheit: real
+
+	{ geração da tabela }
+	celsius <- 0 { valor inicial }
+	faca
+		{ calcula o valor convertido e escreve ambos }
+		fahrenheit <- celsius * 1.8 + 32
+		escreva(celsius, " <---> ", fahrenheit)
+
+		{ passa para o próximo valor em Celsius }
+		celsius <- celsius + 0.5
+
+	
+fim_algoritmo

@@ -1,0 +1,59 @@
+{ exemplificacao de sub-rotinas na forma de funcao e seu uso }
+
+funcao menorInteiro(valor1: inteiro, valor2: inteiro): inteiro
+{ retorna o menor entre valor1 e valor2; se iguais retorna um deles }
+
+      se valor1 < valor2 entao
+           retorne valor1
+      senao
+           retorne valor2
+      fim_se
+fim_funcao
+
+funcao menorReal(valor1: real, valor2: real): real
+{ retorna o menor entre valor1 e valor2; se iguais, retorna um deles }
+
+      se valor1 < valor2 entao
+           retorne valor1
+      senao
+           retorne valor2
+      fim_se
+
+
+funcao modulo(valor: real): real
+{ retorna o valor absoluto do valor }
+
+      se valor < 0 entao
+           valor <- -valor
+      fim_se
+      retorne valor
+fim_funcao
+
+{ parte principal }
+algoritmo
+      declare
+           primeiroInt, segundoInt: inteiro
+		declare
+           primeiroReal, segundoReal: real
+
+      { entrada de dados }
+      leia(primeiroInt, segundoInt, primeiroReal, segundoReal)
+
+      { algumas saidas e manipulacoes }
+      escreva("O menor inteiro entre", primeiroInt, "e", 
+                segundoInt, "eh", menor(primeiroInt, segundoInt))
+
+      se menorReal(primeiroReal, segundoReal) <> primeiroReal entao
+           escreva(segundoReal, "eh menor que", primeiroReal)
+      fim_se
+
+      se modulo(primeiroReal) = primeiroReal e primeiroReal <> 0 entao
+           escreva("O valor", primeiroReal, "eh positivo")
+      senao
+           escreva("O valor", primeiroReal, "nao eh positivo")
+      fim_se
+
+      escreva("Considerando-se o modulo, tem-se que o menor entre",
+                primeiroReal, "e", segundoReal, "eh", 
+                menorReal(modulo(primeiroReal), modulo(segundoReal)))
+fim_algoritmo

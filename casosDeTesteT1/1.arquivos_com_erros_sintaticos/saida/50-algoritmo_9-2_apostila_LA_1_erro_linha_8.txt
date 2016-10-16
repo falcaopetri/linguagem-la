@@ -1,0 +1,2 @@
+Linha 8: erro sintatico proximo a var
+Fim da compilacao

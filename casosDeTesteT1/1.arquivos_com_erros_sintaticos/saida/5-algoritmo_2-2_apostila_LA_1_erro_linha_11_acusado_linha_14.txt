@@ -1,0 +1,2 @@
+Linha 14: erro sintatico proximo a escreva
+Fim da compilacao

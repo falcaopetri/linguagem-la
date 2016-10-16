@@ -1,0 +1,2 @@
+Linha 7: identificador lado1 ja declarado anteriormente
+Fim da compilacao

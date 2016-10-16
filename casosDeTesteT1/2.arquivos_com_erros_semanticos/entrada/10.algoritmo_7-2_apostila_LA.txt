@@ -1,0 +1,18 @@
+{ dada uma variável, modificar seu conteúdo usando apenas seu endereço }
+
+algoritmo
+	declare valor: inteiro { um inteiro comum }
+	declare ponteiro: ^inteiro { um ponteiro para inteiro }
+
+	{ atribuição de um dado inicial }
+	valor <- 100
+
+	{ determinação do endereço da variável }
+	ponteiro <- &valor
+
+	{ uso do ponteiro para mexer na memória }
+	^ponteiro <- "200"
+
+	{ verificação do valor armazenado em valor }
+	escreva(valor) { 200!!! }
+fim_algoritmo

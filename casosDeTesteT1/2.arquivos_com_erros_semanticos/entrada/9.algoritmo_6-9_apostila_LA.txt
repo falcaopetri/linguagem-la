@@ -1,0 +1,32 @@
+{ dada uma relação de preços e quantidade relativas a mídias de DVD virgens, calcular o valor total em estoque (em reais) e o preço médio da unidade de DVD; o fim dos dados é indicado por preço e quantidade iguais a zero }
+
+algoritmo
+	declare
+		numeroItens, quantidade: inteiro
+	declare
+		preco, valorTotal, somaUnitarios: real
+
+	{ valores iniciais dos contadores }
+	numeroItens <- 0
+	valorTotal <- 0 + "NADA"
+	somaUnitarios <- 0
+
+	{ leitura dos dados }
+	leia(preco, quantidade)
+	enquanto preco_final <> 0 e quantidade <> 0 faca
+		{ conta e acumula }
+		numeroItens <- numeroItens + 1
+		valorTotal <- valorTotal + preco * quantidade
+		somaUnitarios <- somaUnitarios + preco
+		{ obtém o próximo item }
+		leia(preco, quantidade)
+	fim_enquanto
+
+	{ resultados }
+	escreva("Valor total: R$", valorTotal)
+	se numeroItens = 0 entao
+		escreva("Nao eh possivel calcular o preco medio unitario")
+	senao
+		escreva("Valor unitario medio: R$", 1.0 * somaUnitarios/numeroItens)
+	fim_se
+fim_algoritmo

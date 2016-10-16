@@ -1,0 +1,2 @@
+Linha 17: erro sintatico proximo a fim_algoritmo
+Fim da compilacao

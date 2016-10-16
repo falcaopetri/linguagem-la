@@ -1,0 +1,34 @@
+{ listar o(s) melhor(es) aluno(s) de uma turma com 40 alunos, dadas as notas de três provas e sabendo-se que todas possuem o mesmo peso no cálculo da média }
+
+algoritmo
+	{ declarações }
+	constante numeroAlunos: inteiro = abc40
+	declare
+		i: inteiro
+	declare
+		notaProva1, notaProva2, notaProva3, melhorMedia: real
+	declare
+		nomeAluno[numeroAlunos]: literal
+	declare
+		media[numeroAlunos]: real
+
+	{ obtenção dos dados, cálculo das médias e seleção da melhor }
+	melhorMedia <- -1
+	para i <- 0 ate numeroAlunos - 1 faca
+		{ força substituição logo para o primeiro aluno }
+		leia(nomeAluno[i], notaProva1, notaProva2, notaProva3)
+		media[i] <- (notaProva1 + notaProva2 + notaProva3)/3
+
+		se media[i] > melhorMedia entao
+			melhorMedia <- media[i]
+		fim_se
+	fim_para
+
+	{ apresentação dos resultados }
+	escreva("Melhor nota final:", melhorMedia)
+	para i <- 0 ate numeroAlunos - 1 faca
+		se media[i] = melhorMedia entao
+			escreva("Nome do aluno:", nomeAluno[i])
+		fim_se
+	fim_para
+fim_algoritmo

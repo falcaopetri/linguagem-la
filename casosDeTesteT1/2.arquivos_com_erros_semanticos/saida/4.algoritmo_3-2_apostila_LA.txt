@@ -1,0 +1,2 @@
+Linha 12: atribuicao nao compativel para formato2
+Fim da compilacao

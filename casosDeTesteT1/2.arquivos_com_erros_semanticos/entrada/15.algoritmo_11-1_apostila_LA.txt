@@ -1,0 +1,97 @@
+{ obter, para uma relação de dados sobre vinhos, o vinho de maior venda e a lista de todos os vinhos que tenham venda abaixo da média geral do grupo }
+
+constante maximoElementos: inteiro = 300
+
+tipo tVinho: registro
+		nome,
+		nomeFabricante,
+		nomeDistribuidor,
+		tipoVinho: literal
+		anoSafra,
+		anoEnvasamento: inteiro
+		preco: real
+		unidades: inteiro
+	fim_registro
+
+procedimento leiaVinho(var vinho: tVinho)
+{ leitura de um registro de vinho }
+
+	escreva("Nome do vinho: ")
+	leia(vinho.nome)
+	escreva("Nome do fabricante: ")
+	leia(vinho.nomeFabricante)
+	escreva("Nome do distribuidor: ")
+	leia(vinho.nomeDistribuidor)
+	escreva("Tipo do vinho (R, T, B): ")
+	leia(vinho.tipoVinho)
+	escreva("Ano da safra: ")
+	leia(vinho.anoSafra)
+	escreva("Ano do envasamento: ")
+	leia(vinho.anoEnvasamento)
+	escreva("Preco da garrafa: ")
+	leia(vinho.preco)
+	escreva("Numero de garrafas: ")
+	leia(vinho.unidades)
+
+fim_procedimento
+
+procedimento escrevaVinho(vinho: tVinho)
+{ escrita de um registro de vinho }
+
+	escreva("Nome do vinho: ", vinho.nome)
+	escreva("Nome do fabricante: ", vinho.nomeFabricante)
+	escreva("Nome do distribuidor: ", vinho.nomeDistribuidor)
+	escreva("Tipo do vinho (R, T, B): ", vinho.tipoVinho)
+	escreva("Ano da safra: ", vinho.anoSafra)
+	escreva("Ano do envasamento: ", vinho.anoEnvasamento)
+	escreva("Preco da garrafa: ", vinho.preco)
+	escreva("Numero de garrafas: ", vinho.unidades)
+	retorne vinho.nome
+fim_procedimento
+
+funcao calculeVendas(vinho: tVinho): real
+{ retorna o produto do preço pelo número de unidades vendidas }
+
+	retorne vinho.unidades * vinho.preco
+fim_funcao
+
+{ parte principal do algoritmo }
+algoritmo
+	declare
+		i, numeroItens: inteiro
+	declare
+		somaVendas, maiorVenda, mediaVinhos: real
+	declare
+		vinho[maximoElementos]: tVinho
+
+	{ leitura da relação de dados e cálculo da média e da maior venda }
+	escreva("Digite o numero de itens: ")
+	leia(numeroItens)
+	somaVendas <- 0
+	maiorVenda <- -1
+	para i <- 0 ate numeroItens - 1 faca
+		{ assume-se maior ou igual a 1 }
+		leiaVinho(vinho[i])
+		somaVendas <- somaVendas + calculeVendas(vinho[i])
+		se calculeVendas(vinho[i]) > maiorVenda entao
+			maiorVenda <- calculeVendas(vinho[i])
+		fim_se
+	fim_para
+	mediaVinhos <- somaVendas/numeroItens
+
+	{ apresentação da melhor venda }
+	escreva("Vinhos com melhor venda: ")
+	para i <- 0 ate numeroItens - 1 faca
+		se calculeVendas(vinho[i]) = maiorVenda entao
+			escrevaVinho(vinho[i])
+		fim_se
+	fim_para
+
+	{ apresentação dos vinhos abaixo da média calculada }
+	escreva("Vinhos abaixo da media: ")
+	para i <- 0 ate numeroItens - 1 faca
+		se calculeVendas(vinho[i]) < mediaVinhos entao
+			escrevaVinho(vinho[i])
+		fim_se
+	fim_para
+fim_algoritmo

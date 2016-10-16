@@ -1,0 +1,21 @@
+{ calcular a média de três provas para cada aluno de uma turma, dado o número de alunos e as notas das provas }
+
+algoritmo
+	declare
+		i, numeroAlunos: inteiro
+	declare
+		prova1, prova2, prova3, media: real
+
+	{ obtenção do número de alunos }
+	leia(numeroAlunos)
+
+	{ cálculo da média para cada aluno }
+	para i <- 1 ate numeroAlunos faca
+		{ obtenção das notas }
+		leia(prova1, prova2, prova3)
+
+		{ cálculo e escrita dos resultados }
+		media <- (prova1 + prova2 + prova3)//3
+		escreva(media)
+	fim_para
+fim_algoritmo

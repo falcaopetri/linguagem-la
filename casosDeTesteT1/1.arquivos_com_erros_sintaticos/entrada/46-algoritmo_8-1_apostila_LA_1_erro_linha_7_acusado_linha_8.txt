@@ -1,0 +1,30 @@
+{ determinar, em R3, qual de dois pontos é o mais próximo da origem }
+
+algoritmo
+	declare
+		ponto1, ponto2: registro
+								x, y, z: real
+							
+	declare
+		distancia1, distancia2: real
+
+	{ leitura das coordenadas dos pontos }
+	leia(ponto1.x, ponto1.y, ponto1.z)
+	leia(ponto2.x, ponto2.y, ponto2.z)
+
+	{ cálculo das distâncias }
+	distancia1 <- raiz(pot(ponto1.x, 2) + pot(ponto1.y, 2) + pot(ponto1.z, 2))
+
+	distancia2 <- raiz(pot(ponto2.x, 2) + pot(ponto2.y, 2) + pot(ponto2.z, 2))
+
+	{ comparação e resultado }
+	se distancia1 < distancia2 entao
+		escreva("O primeiro ponto eh o mais proximo")
+	senao
+		se distancia2 < distancia1 entao
+			escreva("O segundo ponto eh o mais proximo")
+		senao
+			escreva("Os pontos equidistam da origem")
+		fim_se
+	fim_se
+fim_algoritmo

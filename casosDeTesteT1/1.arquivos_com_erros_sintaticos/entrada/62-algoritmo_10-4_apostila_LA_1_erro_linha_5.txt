@@ -1,0 +1,123 @@
+{ exemplificação de teoria de conjuntos para a operação de união, usando a leitura de dois conjuntos de valores reais e mostrando o resultado da união }
+
+constante maximoElementos: inteiro = 50 { número máx. de elementos no conjunto }
+
+tipo tConjunto registro
+						numeroElementos: inteiro
+						elementos[maximoElementos]: real
+					fim_registro
+
+procedimento insereConjunto(elemento: real, var conjunto: tConjunto, var sucesso: logico)
+{ insere um novo elemento no conjunto, retornando sucesso=verdadeiro se a inserção ocorrer; retorna falso se não houver espaço ou se o elemento for repetido }
+
+	declare i: inteiro
+	declare achou: logico
+
+	{ ajusta o resultado padrão }
+	sucesso <- falso
+
+	se conjunto.numeroElementos < maximoElementos entao 
+		{ verifica se o elemento já está no conjunto }
+		i <- 0
+		achou <- falso
+		enquanto nao achou e i < conjunto.numeroElementos faca
+			achou <- elemento = conjunto.elemento[i]
+		fim_enquanto
+	fim_se
+
+	se nao achou entao
+		{ insere o novo elemento no conjunto }
+		conjunto.elemento[conjunto.numeroElementos] <- elemento
+		conjunto.numeroElementos <- conjunto.numeroElementos + 1
+
+		sucesso <- verdadeiro
+	fim_se
+fim_procedimento
+
+procedimento leiaConjunto(var conjunto: tConjunto)
+{ leitura dos elementos de um conjunto, evitando as repetições }
+	declare numeroElementos: inteiro
+	declare elemento: real
+	declare insercaoOk: logico
+
+	{ criação de um conjunto inicialmente vazio }
+	conjunto.numeroElementos <- 0
+
+	{ obtenção do número de elementos do conjunto (com limitação) }
+	faca
+		leia(numeroElementos)
+		se numeroElementos > maximoElementos entao
+			escreva("O limite eh de zero a ", maximoElementos)
+		fim_se
+	ate numeroElementos > 0 e numeroElementos < maximoElementos
+
+	{ entrada de cada elemento }
+	enquanto conjunto.numeroElementos < numeroElementos faca
+		leia(elemento)
+
+		insereConjunto(elemento, conjunto, insercaoOk)
+
+		se nao insercaoOk entao
+			escreva("O elemento ja existe; digite outro.")
+		fim_se
+	fim_enquanto
+fim_procedimento
+
+procedimento escrevaConjunto(conjunto: tConjunto)
+{ escrita dos elementos de um conjunto }
+
+	declare i: inteiro
+
+	se conjunto.numeroElementos = 0 entao
+		escreva ("Conjunto vazio")
+	senao
+		para i <- 0 ate conjunto.numeroElementos - 1 faca
+			escreva(conjunto.elemento[i])
+		fim_para
+	fim_se
+fim_procedimento
+
+procedimento unaConjuntos(var resultado: tConjunto, conjunto1, conjunto2: tConjunto)
+{ cria o conjunto resultado a partir da união dos conjuntos 1 e 2 }
+	declare
+		i: inteiro
+	declare
+		insercaoOk: logico
+
+	{ cria resultado inicialmente igual ao primeiro conjunto }
+	resultado <- conjunto1
+
+	{ insere os elementos do conjunto 2 no resultado, sem repetições }
+	insercaoOk <- verdadeiro
+	i <- 0
+	enquanto i < conjunto2.numeroElementos e insercaoOk faca
+		insereConjunto(conjunto2.elemento[i], resultado, insercaoOk)
+		i <- i + 1
+	fim_enquanto
+
+	se nao insercaoOk entao
+		escreva("Nao houve espaco para a uniao; o resultado", "nao contem todos os elementos")
+	fim_se
+fim_procedimento
+
+{ parte principal }
+algoritmo
+
+	declare conjunto1, conjunto2, conjuntoUniao: tConjunto
+
+	{ entrada de dados }
+	leiaConjunto(conjunto1)
+	leiaConjunto(conjunto2)
+
+	{ união }
+	unaConjuntos(conjuntoUniao, conjunto1, conjunto2)
+
+	{ resultado }
+	escreva("Resultado da uniao de")
+	escrevaConjunto(conjunto1)
+	escreva("e")
+	escrevaConjunto(conjunto2)
+	escreva("contem os elementos")
+	escrevaConjunto(conjuntoUniao)
+
+fim_algoritmo

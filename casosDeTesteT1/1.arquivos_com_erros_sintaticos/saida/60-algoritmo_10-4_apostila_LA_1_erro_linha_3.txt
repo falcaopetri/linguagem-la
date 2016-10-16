@@ -1,0 +1,2 @@
+Linha 3: erro sintatico proximo a intero
+Fim da compilacao

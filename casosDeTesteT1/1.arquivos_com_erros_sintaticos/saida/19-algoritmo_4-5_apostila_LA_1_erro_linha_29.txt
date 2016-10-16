@@ -1,0 +1,2 @@
+Linha 29: erro sintatico proximo a "Houve colisao?"
+Fim da compilacao

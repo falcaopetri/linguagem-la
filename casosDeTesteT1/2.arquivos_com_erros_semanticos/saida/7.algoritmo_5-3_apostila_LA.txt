@@ -1,0 +1,2 @@
+Linha 21: atribuicao nao compativel para classificacao
+Fim da compilacao

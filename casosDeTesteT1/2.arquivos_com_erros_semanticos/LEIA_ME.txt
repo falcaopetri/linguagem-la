@@ -1,0 +1,1 @@
+Para esses arquivos nenhum código C deve ser gerado. A saída do compilador deve relatar erros semânticos no arquivo de entrada, como especificado no arquivo de saída correspondente.
