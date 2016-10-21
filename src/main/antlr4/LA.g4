@@ -3,6 +3,6 @@
  * and open the template in the editor.
  */
 
-grammar la;
+grammar LA;
 
 main: 'main';

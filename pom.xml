@@ -10,16 +10,15 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
-    
+        
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.antlr/antlr4-runtime -->
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
-            <version>4.5.3</version>
+            <version>4.3</version>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>
@@ -45,6 +44,46 @@
                 </executions>
             </plugin>
             
+            <!--
+                Resolves .jar dependencies.
+                Source: http://stackoverflow.com/a/8842751
+            -->
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>trabalho1.Main</mainClass>
+                            <packageName>trabalho1</packageName>
+                            <classpathLayoutType>custom</classpathLayoutType>
+                            <customClasspathLayout>libs/$${artifact.artifactId}.$${artifact.extension}</customClasspathLayout>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/libs</outputDirectory>
+                            <overWriteReleases>true</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                            <excludeScope>test</excludeScope>
+                            <includeScope>compile</includeScope>
+                            <stripVersion>true</stripVersion>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -61,8 +100,9 @@
                                 <argument>-jar</argument>
                                 <argument>${basedir}/corretor/CorretorTrabalho1.jar</argument>
                                 <argument>java -jar ${basedir}/target/Trabalho1-1.jar</argument>
-                                <argument>${basedir}/tmp</argument>
+                                
                                 <argument>gcc</argument>
+                                <argument>${basedir}/tmp</argument>
                                 <argument>${basedir}/corretor/casosDeTesteT1</argument>
                                 <argument>""</argument>
                                 <!-- Opções: sintatico, semantico, gerador, tudo-->
