@@ -37,7 +37,7 @@
                             <sourceDirectory>src</sourceDirectory>
                             <arguments>
                                 <argument>-package</argument>
-                                <argument>trabalho1</argument>
+                                <argument>main.antlr4</argument>
                             </arguments>
                         </configuration>
                     </execution>

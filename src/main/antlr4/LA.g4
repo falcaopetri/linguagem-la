@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 grammar LA;
 
 /*
@@ -346,7 +341,17 @@ parcela_logica :    'verdadeiro' |
                     'falso' |
                     exp_relacional;
 
-IDENT : 'MUDAR';
-NUM_INT : 'MUDAR';
-NUM_REAL : 'MUDAR';
-CADEIA : 'MUDAR';
+IDENT : (('a'..'z')|('A'..'Z')|'_')(('a'..'z')|('A'..'Z')|'_'|('0'..'9'))*;
+NUM_INT : ('0'..'9')+ ;
+NUM_REAL : ('0'..'9')+'.'('0'..'9')+;
+CADEIA : '"' (~('\n'))* '"';
+
+/*
+    Foi criada uma regra do lexer para identificar espaços em branco de acordo
+    com a especificação da linguagem e com o enunciado do trabalho.
+*/
+WS : (' ' |'\t' | '\r' | '\n') {skip(); };
+
+COMMENTS : '{' .* '}' {skip();};
+
+/* . : {  }; */
