@@ -1,9 +1,13 @@
 grammar LA;
 
+@header {
+  import trabalho1.Saida;
+}
+
 /*
 1. <programa> ::= <declaracoes> algoritmo <corpo> fim_algoritmo
 */
-programa : declaracoes 'algortimo' corpo 'fim_algortimo';
+programa : declaracoes 'algoritmo' corpo 'fim_algoritmo' EOF;
 
 /*
 2. <declaracoes> ::= <decl_local_global> <declaracoes> | ε
@@ -148,7 +152,7 @@ comandos : cmd comandos | ;
  | IDENT <chamada_atribuicao>
  | retorne <expressao>
 */
-cmd :   'leia' '(' identificador mais_ident |
+cmd :   'leia' '(' identificador mais_ident ')' |
         'escreva' '(' expressao mais_expressao ')' |
         'se' expressao 'entao' comandos senao_opcional 'fim_se' |
         'caso' exp_aritmetica 'seja' selecao senao_opcional 'fim_caso' |
@@ -344,7 +348,13 @@ parcela_logica :    'verdadeiro' |
 IDENT : (('a'..'z')|('A'..'Z')|'_')(('a'..'z')|('A'..'Z')|'_'|('0'..'9'))*;
 NUM_INT : ('0'..'9')+ ;
 NUM_REAL : ('0'..'9')+'.'('0'..'9')+;
-CADEIA : '"' (~('\n'))* '"';
+
+/*
+    *? altera o comportamento guloso
+*/
+CADEIA : '"' (~('\n'))*? '"';
+
+COMMENTS  : '{' ~( '\n' | '\r' )* '}' { skip(); };
 
 /*
     Foi criada uma regra do lexer para identificar espaços em branco de acordo
@@ -352,6 +362,13 @@ CADEIA : '"' (~('\n'))* '"';
 */
 WS : (' ' |'\t' | '\r' | '\n') {skip(); };
 
-COMMENTS : '{' .* '}' {skip();};
 
-/* . : {  }; */
+/*
+    Força o matching de um abre parênteses para passar no caso de testes sintático número 14
+*/
+ABRE : '{' { Saida.println("Linha " + (getLine()+1) + ": comentario nao fechado"); };
+
+/*
+    Detecta erros léxicos
+*/
+ANY : . { Saida.println("Linha " + getLine() + ": " + getText() + " - simbolo nao identificado"); };

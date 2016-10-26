@@ -5,14 +5,14 @@
  */
 package trabalho1;
 
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
+import main.antlr4.LALexer;
+import main.antlr4.LAParser;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
 
 /**
  *
@@ -24,19 +24,24 @@ public class Main {
         String inputFilePath = args[0];
         String outputFilePath = args[1];
 
-        System.out.println(inputFilePath);
-        System.out.println(outputFilePath);
-
         FileReader inputTestCase = new FileReader(inputFilePath);
-        
+
         ANTLRInputStream input = new ANTLRInputStream(inputTestCase);
         LALexer lexer = new LALexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         LAParser parser = new LAParser(tokens);
-        
-        // parser.programa();
 
-        Saida.println("afjalsdhfkashd");
+        MeuErrorListener mel = new MeuErrorListener();
+
+        lexer.removeErrorListeners();
+        parser.removeErrorListeners();
+
+        parser.addErrorListener(mel);
+
+        parser.programa();
+        
+        Saida.force_println("Fim da compilacao");
+
         PrintWriter outputTestCase = new PrintWriter(outputFilePath, "UTF-8");
         outputTestCase.print(Saida.getTexto());
         outputTestCase.close();
