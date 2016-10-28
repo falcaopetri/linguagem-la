@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package trabalho1;
 
 import java.util.BitSet;
@@ -13,11 +8,8 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 
-/**
- *
- * @author petri
- */
 public class MeuErrorListener implements ANTLRErrorListener {
 
     @Override
@@ -34,6 +26,10 @@ public class MeuErrorListener implements ANTLRErrorListener {
         }
 
         Saida.println("Linha " + i + ": erro sintatico proximo a " + text);
+
+        // TODO lançando uma ParseCancellationException, poderíamos simplificar o Saida
+        // O problema é que simplficiando o Saida, afetamos os erros reports que estão na gramática
+        // throw new ParseCancellationException();
     }
 
     @Override

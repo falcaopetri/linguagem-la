@@ -7,7 +7,7 @@ grammar LA;
 /*
 1. <programa> ::= <declaracoes> algoritmo <corpo> fim_algoritmo
 */
-programa : declaracoes 'algoritmo' corpo 'fim_algoritmo' EOF;
+programa : declaracoes 'algoritmo' corpo 'fim_algoritmo';
 
 /*
 2. <declaracoes> ::= <decl_local_global> <declaracoes> | ε
