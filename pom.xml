@@ -50,6 +50,7 @@
             -->
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -106,7 +107,7 @@
                                 <argument>${basedir}/corretor/casosDeTesteT1</argument>
                                 <argument>""</argument>
                                 <!-- Opções: sintatico, semantico, gerador, tudo-->
-                                <argument>sintatico</argument>
+                                <argument>semantico</argument>
                             </arguments>
                         </configuration>                        
                     </execution>
