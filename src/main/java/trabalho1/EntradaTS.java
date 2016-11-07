@@ -1,3 +1,5 @@
+package trabalho1;
+
 public class EntradaTS {
     private String nome, tipo;
     
