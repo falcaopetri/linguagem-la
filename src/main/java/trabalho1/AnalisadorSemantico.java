@@ -37,6 +37,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
         // FIXME Check não muito eficiente: percorre as tabelas de símbolos 2 vezes
         if (!ts.existeSimbolo(tipo) || ts.getSimbolo(tipo).getTipo() != "tipo") {
             Saida.println("Linha " + ctx.tipo().getStart().getLine() + ": tipo " + tipo + " nao declarado");
+            tryToAddVariable(nome, tipo, ctx.getStart().getLine());
         } else {
             tryToAddVariable(nome, tipo, ctx.getStart().getLine());
 
@@ -46,6 +47,8 @@ public class AnalisadorSemantico extends LABaseVisitor {
                 mais_var = mais_var.mais_var();
             }
         }
+      
+        
         return super.visitVariavel(ctx);
     }
 
@@ -85,6 +88,12 @@ public class AnalisadorSemantico extends LABaseVisitor {
 
     @Override
     public Object visitParcela_unario(LAParser.Parcela_unarioContext ctx) {
+        if(ctx.IDENT() != null){
+            TerminalNode ident = ctx.IDENT();
+            if (!ts.existeSimbolo(ident.getText())){
+                Saida.println("Linha " + ident.getSymbol().getLine() + ": identificador " + ident.getText() + " nao declarado", true);
+            }
+        }
         return super.visitParcela_unario(ctx); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -96,11 +105,12 @@ public class AnalisadorSemantico extends LABaseVisitor {
     @Override
     public Object visitIdentificador(LAParser.IdentificadorContext ctx) {
         TerminalNode ident = ctx.IDENT();
-
+        
         // TODO add checking ts.getSimbolo(ident.getText()).getTipo() not in TIPOS
         if (!ts.existeSimbolo(ident.getText())) {
             Saida.println("Linha " + ident.getSymbol().getLine() + ": identificador " + ident.getText() + " nao declarado", true);
         }
+        
 
         return super.visitIdentificador(ctx);
     }
