@@ -36,7 +36,9 @@ public class AnalisadorSemantico extends LABaseVisitor {
 
         // FIXME Check não muito eficiente: percorre as tabelas de símbolos 2 vezes
         if (!ts.existeSimbolo(tipo) || ts.getSimbolo(tipo).getTipo() != "tipo") {
-            Saida.println("Linha " + ctx.tipo().getStart().getLine() + ": tipo " + tipo + " nao declarado");
+            Saida.println("Linha " + ctx.tipo().getStart().getLine() + ": tipo " + tipo + " nao declarado", true);
+
+            // Tenta recuperar do erro semântico (tipo não declarado). Adiciona o tipo na TS para que outros passar no Test Case 1.
             tryToAddVariable(nome, tipo, ctx.getStart().getLine());
         } else {
             tryToAddVariable(nome, tipo, ctx.getStart().getLine());
@@ -47,8 +49,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
                 mais_var = mais_var.mais_var();
             }
         }
-      
-        
+
         return super.visitVariavel(ctx);
     }
 
@@ -74,11 +75,11 @@ public class AnalisadorSemantico extends LABaseVisitor {
                                         | constante IDENT : <tipo_basico> = <valor_constante>
                                         | tipo IDENT : <tipo>
          */
-        if (ctx.variavel().isEmpty()) { // se variavel() não está vazio, então já tratamos dela em visitVariavel()
-            if (!ctx.tipo_basico().isEmpty()) { // constante IDENT : <tipo_basico> = <valor_constante>
+        if (ctx.variavel() != null) { // se variavel() não está vazio, então já tratamos dela em visitVariavel()
+            if (ctx.tipo_basico() != null) { // constante IDENT : <tipo_basico> = <valor_constante>
                 // TODO
                 // try to add constant
-            } else if (!ctx.tipo().isEmpty()) { // tipo IDENT : <tipo>
+            } else if (ctx.tipo() != null) { // tipo IDENT : <tipo>
                 // TODO
                 // try to add tipo
             }
@@ -88,9 +89,9 @@ public class AnalisadorSemantico extends LABaseVisitor {
 
     @Override
     public Object visitParcela_unario(LAParser.Parcela_unarioContext ctx) {
-        if(ctx.IDENT() != null){
+        if (ctx.IDENT() != null) {
             TerminalNode ident = ctx.IDENT();
-            if (!ts.existeSimbolo(ident.getText())){
+            if (!ts.existeSimbolo(ident.getText())) {
                 Saida.println("Linha " + ident.getSymbol().getLine() + ": identificador " + ident.getText() + " nao declarado", true);
             }
         }
@@ -105,12 +106,11 @@ public class AnalisadorSemantico extends LABaseVisitor {
     @Override
     public Object visitIdentificador(LAParser.IdentificadorContext ctx) {
         TerminalNode ident = ctx.IDENT();
-        
+
         // TODO add checking ts.getSimbolo(ident.getText()).getTipo() not in TIPOS
         if (!ts.existeSimbolo(ident.getText())) {
             Saida.println("Linha " + ident.getSymbol().getLine() + ": identificador " + ident.getText() + " nao declarado", true);
         }
-        
 
         return super.visitIdentificador(ctx);
     }
