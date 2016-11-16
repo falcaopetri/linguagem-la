@@ -161,7 +161,7 @@ cmd :   'leia' '(' identificador mais_ident ')' |
         'faca' comandos 'ate' expressao |
         '^' IDENT outros_ident dimensao '<-' expressao |
         IDENT chamada_atribuicao |
-        'retorne' expressao;
+        'retorne' retorno=expressao;
 
 /*
 28. <mais_expressao> ::= , <expressao> <mais_expressao> | ε

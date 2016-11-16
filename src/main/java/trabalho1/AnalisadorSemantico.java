@@ -3,6 +3,7 @@ package trabalho1;
 import java.util.Arrays;
 import main.antlr4.LABaseVisitor;
 import main.antlr4.LAParser;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class AnalisadorSemantico extends LABaseVisitor {
@@ -27,6 +28,14 @@ public class AnalisadorSemantico extends LABaseVisitor {
         global.adicionarSimbolos(Arrays.asList("literal", "inteiro", "real", "logico"), "tipo");
 
         ts.empilhar(global);
+    }
+
+    @Override
+    public Object visitCorpo(LAParser.CorpoContext ctx) {
+        // assert que não existe return
+        assert_does_not_return(ctx.comandos());
+
+        return super.visitCorpo(ctx);
     }
 
     @Override
@@ -61,6 +70,11 @@ public class AnalisadorSemantico extends LABaseVisitor {
         19. <declaracao_global> ::= procedimento IDENT ( <parametros_opcional> ) <declaracoes_locais> <comandos> fim_procedimento
                                     | funcao IDENT ( <parametros_opcional> ) : <tipo_estendido> <declaracoes_locais> <comandos> fim_funcao
          */
+        Token declaracao_tipo = ctx.getStart();
+        if (declaracao_tipo.toString().equals("procedimento")) {
+            // assert que não existe return
+            assert_does_not_return(ctx.comandos());
+        }
         // TODO vai ser necessário armazenar os parâmetros formais do procedimento/funcao para satisfazer a Regra Semântica 4:
         // 4) Incompatibilidade entre argumentos e parâmetros formais (número, ordem e tipo) na chamada de um procedimento ou uma função
         return super.visitDeclaracao_global(ctx);
@@ -95,7 +109,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
                 Saida.println("Linha " + ident.getSymbol().getLine() + ": identificador " + ident.getText() + " nao declarado", true);
             }
         }
-        return super.visitParcela_unario(ctx); //To change body of generated methods, choose Tools | Templates.
+        return super.visitParcela_unario(ctx);
     }
 
     @Override
@@ -125,6 +139,20 @@ public class AnalisadorSemantico extends LABaseVisitor {
             Saida.println("Linha " + line + ": identificador " + nome + " ja declarado anteriormente", true);
         } else {
             ts.topo().adicionarSimbolo(nome, tipo);
+        }
+    }
+
+    private void assert_does_not_return(LAParser.ComandosContext comandos) {
+        // TODO comments
+
+        while (comandos != null) {
+            LAParser.CmdContext cmd = comandos.cmd();
+            if (cmd != null && cmd.retorno != null) {
+                // existe o comando "retorne" dentro do conjunto de comandos de um procedimento
+                Saida.println("Linha " + cmd.getStart().getLine() + ": comando retorne nao permitido nesse escopo");
+            }
+
+            comandos = comandos.comandos();
         }
     }
 
