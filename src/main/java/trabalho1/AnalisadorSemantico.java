@@ -75,7 +75,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
                                         | constante IDENT : <tipo_basico> = <valor_constante>
                                         | tipo IDENT : <tipo>
          */
-        if (ctx.variavel() != null) { // se variavel() não está vazio, então já tratamos dela em visitVariavel()
+        if (ctx.variavel() == null) { // se variavel() não está vazio, então já tratamos dela em visitVariavel()
             if (ctx.tipo_basico() != null) { // constante IDENT : <tipo_basico> = <valor_constante>
                 // TODO
                 // try to add constant
