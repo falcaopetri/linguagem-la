@@ -22,6 +22,11 @@ public class TabelaDeSimbolos {
             simbolos.add(new EntradaTS(s, tipo));
         }
     }
+    
+    public void adicionarEntrada(EntradaTS entrada) {
+        simbolos.add(entrada);
+    }
+    
 
     public boolean existeSimbolo(String nome) {
         for (EntradaTS etds : simbolos) {

@@ -31,7 +31,8 @@ public class PilhaDeTabelas {
         }
         return false;
     }
-
+    
+    
     public EntradaTS getSimbolo(String nome) {
         for (TabelaDeSimbolos ts : pilha) {
             EntradaTS entry = ts.getSimbolo(nome);

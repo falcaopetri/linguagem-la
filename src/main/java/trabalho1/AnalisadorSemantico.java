@@ -49,7 +49,6 @@ public class AnalisadorSemantico extends LABaseVisitor {
         return super.visitCmd(ctx); //To change body of generated methods, choose Tools | Templates.
     }
 
-    
     @Override
     public Object visitVariavel(LAParser.VariavelContext ctx) {
         String nome = ctx.IDENT().getText();
@@ -73,21 +72,45 @@ public class AnalisadorSemantico extends LABaseVisitor {
 
         return super.visitVariavel(ctx);
     }
-    
+
     @Override
     public Object visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) {
-        // Atenção: declaração GLOBAL -> CUIDADO COM O ESCOPO DE INSERÇÃO: topo()
+        // inicia empty function struct
+        EntradaTSParam ep = new EntradaTSParam(ctx.IDENT().getText());
+        if (ctx.parametros_opcional().parametro() != null) {
+            LAParser.ParametroContext parametro = ctx.parametros_opcional().parametro();
+            LAParser.Mais_identContext maisIdent = ctx.parametros_opcional().parametro().mais_ident();
+            while (parametro != null) {
+                LAParser.IdentificadorContext identificador = parametro.identificador();
+
+                if (!ts.existeSimbolo(parametro.tipo_estendido().getText()) || ts.getSimbolo(parametro.tipo_estendido().getText()).getTipo() != "tipo") {
+                    Saida.println("Linha " + parametro.tipo_estendido().getStart().getLine() + ": tipo " + parametro.tipo_estendido().getText() + " nao declarado");
+                    ep.addParametro(identificador.getText(), parametro.tipo_estendido().getText());
+                } else {
+                    ep.addParametro(identificador.getText(), parametro.tipo_estendido().getText());
+                }
+
+                while (maisIdent != null) {
+                    identificador = maisIdent.identificador();
+                    if (!ts.existeSimbolo(identificador.getText()) || ts.getSimbolo(parametro.tipo_estendido().getText()).getTipo() != "tipo") {
+                        Saida.println("Linha " + parametro.tipo_estendido().getStart().getLine() + ": tipo " + parametro.tipo_estendido().getText() + " nao declarado");
+                        ep.addParametro(identificador.getText(), parametro.tipo_estendido().getText());
+
+                    } else {
+                        ep.addParametro(identificador.getText(), parametro.tipo_estendido().getText());
+                    }
+
+                    maisIdent = maisIdent.mais_ident();
+                }
+                parametro = parametro.mais_parametros().parametro();
+            }
+            tryToAddFunc(ep, ctx.getStart().getLine());
+        }
 
         /*
         19. <declaracao_global> ::= procedimento IDENT ( <parametros_opcional> ) <declaracoes_locais> <comandos> fim_procedimento
                                     | funcao IDENT ( <parametros_opcional> ) : <tipo_estendido> <declaracoes_locais> <comandos> fim_funcao
-         */
-        Token declaracao_tipo = ctx.getStart();
-        if (declaracao_tipo.toString().equals("procedimento")) {
-            // assert que não existe return
-            assert_does_not_return(ctx.comandos());
-        }
-        // TODO vai ser necessário armazenar os parâmetros formais do procedimento/funcao para satisfazer a Regra Semântica 4:
+         */ // TODO vai ser necessário armazenar os parâmetros formais do procedimento/funcao para satisfazer a Regra Semântica 4:
         // 4) Incompatibilidade entre argumentos e parâmetros formais (número, ordem e tipo) na chamada de um procedimento ou uma função
         return super.visitDeclaracao_global(ctx);
     }
@@ -164,6 +187,14 @@ public class AnalisadorSemantico extends LABaseVisitor {
             }
 
             comandos = comandos.comandos();
+        }
+    }
+
+    private void tryToAddFunc(EntradaTS entrada, int line) {
+        if (ts.existeSimbolo(entrada.getNome())) {
+            Saida.println("Linha " + line + ": identificador " + entrada.getNome() + " ja declarado anteriormente", true);
+        } else {
+            ts.topo().adicionarEntrada(entrada);
         }
     }
 
