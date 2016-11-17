@@ -39,6 +39,18 @@ public class AnalisadorSemantico extends LABaseVisitor {
     }
 
     @Override
+    public Object visitCmd(LAParser.CmdContext ctx) {
+        if (ctx.IDENT() != null) {
+            TerminalNode ident = ctx.IDENT();
+            if (!ts.existeSimbolo(ident.getText())) {
+                Saida.println("Linha " + ident.getSymbol().getLine() + ": identificador " + ident.getText() + " nao declarado", true);
+            }
+        }
+        return super.visitCmd(ctx); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    
+    @Override
     public Object visitVariavel(LAParser.VariavelContext ctx) {
         String nome = ctx.IDENT().getText();
         String tipo = ctx.tipo().getText();
@@ -61,7 +73,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
 
         return super.visitVariavel(ctx);
     }
-
+    
     @Override
     public Object visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) {
         // Atenção: declaração GLOBAL -> CUIDADO COM O ESCOPO DE INSERÇÃO: topo()
@@ -91,8 +103,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
          */
         if (ctx.variavel() == null) { // se variavel() não está vazio, então já tratamos dela em visitVariavel()
             if (ctx.tipo_basico() != null) { // constante IDENT : <tipo_basico> = <valor_constante>
-                // TODO
-                // try to add constant
+                tryToAddVariable(ctx.IDENT().getText(), ctx.tipo_basico().getText(), ctx.getStart().getLine());
             } else if (ctx.tipo() != null) { // tipo IDENT : <tipo>
                 // TODO
                 // try to add tipo
