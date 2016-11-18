@@ -83,7 +83,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
             while (parametro != null) {
                 LAParser.IdentificadorContext identificador = parametro.identificador();
 
-                if (!ts.existeSimbolo(parametro.tipo_estendido().getText()) || ts.getSimbolo(parametro.tipo_estendido().getText()).getTipo() != "tipo") {
+                if (!ts.existeSimbolo(parametro.tipo_estendido().getText()) || !"tipo".equals(ts.getSimbolo(parametro.tipo_estendido().getText()).getTipo())) {
                     Saida.println("Linha " + parametro.tipo_estendido().getStart().getLine() + ": tipo " + parametro.tipo_estendido().getText() + " nao declarado");
                     ep.addParametro(identificador.getText(), parametro.tipo_estendido().getText());
                 } else {
@@ -92,7 +92,12 @@ public class AnalisadorSemantico extends LABaseVisitor {
 
                 while (maisIdent != null) {
                     identificador = maisIdent.identificador();
-                    if (!ts.existeSimbolo(identificador.getText()) || ts.getSimbolo(parametro.tipo_estendido().getText()).getTipo() != "tipo") {
+
+                    if (identificador == null) {
+                        break;
+                    }
+
+                    if (!ts.existeSimbolo(identificador.getText()) || !"tipo".equals(ts.getSimbolo(parametro.tipo_estendido().getText()).getTipo())) {
                         Saida.println("Linha " + parametro.tipo_estendido().getStart().getLine() + ": tipo " + parametro.tipo_estendido().getText() + " nao declarado");
                         ep.addParametro(identificador.getText(), parametro.tipo_estendido().getText());
 

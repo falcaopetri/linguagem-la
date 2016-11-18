@@ -17,6 +17,7 @@ public class EntradaTSParam extends EntradaTS {
 
     public EntradaTSParam(String nome) {
         super(nome, "Func/Proc");
+        listaParametros = new ArrayList<>();
     }
 
     public int contarParametros() {
@@ -46,6 +47,16 @@ public class EntradaTSParam extends EntradaTS {
         }
 
         return false;
+    }
+
+    @Override
+    public String toString() {
+        String params = "";
+        for (Param p : listaParametros) {
+            params += p.toString();
+        }
+
+        return super.toString() + " " + params;
     }
 
 }
