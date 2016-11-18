@@ -45,11 +45,34 @@ public class AnalisadorSemantico extends LABaseVisitor {
             if (!ts.existeSimbolo(ident.getText())) {
                 Saida.println("Linha " + ident.getSymbol().getLine() + ": identificador " + ident.getText() + " nao declarado", true);
             }
+
+            if (ctx.chamada_atribuicao() != null) {
+                TipoExpressao tipo = (TipoExpressao) visitChamada_atribuicao(ctx.chamada_atribuicao());
+
+                TipoExpressao tipo_ident = TipoExpressao.NONE;
+
+                // FIXME gambiarra temporária -> settar tipo da EntradaTS como TipoExpressao (enum)
+                if (ts.getSimbolo(ident.getText()).getTipo().equals("inteiro")) {
+                    tipo_ident = TipoExpressao.INTEIRO;
+                } else if (ts.getSimbolo(ident.getText()).getTipo().equals("real")) {
+                    tipo_ident = TipoExpressao.REAL;
+                } else if (ts.getSimbolo(ident.getText()).getTipo().equals("logico")) {
+                    tipo_ident = TipoExpressao.LOGICO;
+                } else if (ts.getSimbolo(ident.getText()).getTipo().equals("literal")) {
+                    tipo_ident = TipoExpressao.LITERAL;
+                }
+
+                if (!TipoExpressao.checkAtribuicao(tipo, tipo_ident)) {
+                    Saida.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": atribuicao nao compativel para " + ctx.IDENT(), true);
+                }
+
+                return null;
+            }
         }
-        return super.visitCmd(ctx); //To change body of generated methods, choose Tools | Templates.
+
+        return super.visitCmd(ctx);
     }
 
-    
     @Override
     public Object visitVariavel(LAParser.VariavelContext ctx) {
         String nome = ctx.IDENT().getText();
@@ -73,7 +96,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
 
         return super.visitVariavel(ctx);
     }
-    
+
     @Override
     public Object visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) {
         // Atenção: declaração GLOBAL -> CUIDADO COM O ESCOPO DE INSERÇÃO: topo()
@@ -118,14 +141,75 @@ public class AnalisadorSemantico extends LABaseVisitor {
             TerminalNode ident = ctx.IDENT();
             if (!ts.existeSimbolo(ident.getText())) {
                 Saida.println("Linha " + ident.getSymbol().getLine() + ": identificador " + ident.getText() + " nao declarado", true);
+            } else if (ctx.chamada_partes() != null) {
+
+                // FIXME gambiarra temporária -> settar tipo da EntradaTS como TipoExpressao (enum)
+                String tipo = ts.getSimbolo(ctx.IDENT().getText()).getTipo();
+                if (tipo.equals("inteiro")) {
+                    return TipoExpressao.INTEIRO;
+                } else if (tipo.equals("real")) {
+                    return TipoExpressao.REAL;
+                } else if (tipo.equals("logico")) {
+                    return TipoExpressao.LOGICO;
+                } else if (tipo.equals("literal")) {
+                    return TipoExpressao.LITERAL;
+                }
             }
         }
+
+        if (ctx.NUM_INT() != null) {
+            return TipoExpressao.INTEIRO;
+        }
+
+        if (ctx.NUM_REAL() != null) {
+            return TipoExpressao.REAL;
+        }
+
+        if (ctx.expressao() != null) {
+            return visitExpressao(ctx.expressao());
+        }
+
         return super.visitParcela_unario(ctx);
     }
 
     @Override
+    public Object visitChamada_atribuicao(LAParser.Chamada_atribuicaoContext ctx) {
+        if (ctx.expressao() != null) {
+            visitOutros_ident(ctx.outros_ident());
+            visitDimensao(ctx.dimensao());
+            TipoExpressao tipo = (TipoExpressao) visitExpressao(ctx.expressao());
+
+            return tipo;
+        } else {
+            return super.visitChamada_atribuicao(ctx);
+        }
+    }
+
+    @Override
     public Object visitParcela_nao_unario(LAParser.Parcela_nao_unarioContext ctx) {
-        return super.visitParcela_nao_unario(ctx); //To change body of generated methods, choose Tools | Templates.
+        if (ctx.CADEIA() != null) {
+            return TipoExpressao.LITERAL;
+        }
+        return super.visitParcela_nao_unario(ctx);
+    }
+
+    @Override
+    public Object visitParcela(LAParser.ParcelaContext ctx) {
+        // 46. < parcela > ::= <op_unario > <parcela_unario> | <parcela_nao_unario>
+        if (ctx.parcela_nao_unario() != null) {
+            return visitParcela_nao_unario(ctx.parcela_nao_unario());
+        } else {
+            return super.visitParcela(ctx);
+        }
+    }
+
+    @Override
+    public Object visitParcela_logica(LAParser.Parcela_logicaContext ctx) {
+        if (ctx.exp_relacional() == null) {
+            return TipoExpressao.LOGICO;
+        } else {
+            return visitExp_relacional(ctx.exp_relacional());
+        }
     }
 
     @Override
@@ -141,8 +225,110 @@ public class AnalisadorSemantico extends LABaseVisitor {
     }
 
     @Override
-    public Object visitChamada_atribuicao(LAParser.Chamada_atribuicaoContext ctx) {
-        return super.visitChamada_atribuicao(ctx); //To change body of generated methods, choose Tools | Templates.
+    public Object visitExpressao(LAParser.ExpressaoContext ctx) {
+        TipoExpressao tipo1 = (TipoExpressao) visitTermo_logico(ctx.termo_logico());
+        TipoExpressao tipo2 = (TipoExpressao) visitOutros_termos_logicos(ctx.outros_termos_logicos());
+
+        return TipoExpressao.mergeTipos(tipo1, tipo2);
+    }
+
+    @Override
+    public Object visitExp_aritmetica(LAParser.Exp_aritmeticaContext ctx) {
+        TipoExpressao tipo1 = (TipoExpressao) visitTermo(ctx.termo());
+        TipoExpressao tipo2 = (TipoExpressao) visitOutros_termos(ctx.outros_termos());
+
+        return TipoExpressao.mergeTipos(tipo1, tipo2);
+    }
+
+    @Override
+    public Object visitExp_relacional(LAParser.Exp_relacionalContext ctx) {
+        TipoExpressao tipo1 = (TipoExpressao) visitExp_aritmetica(ctx.exp_aritmetica());
+        TipoExpressao tipo2 = (TipoExpressao) visitOp_opcional(ctx.op_opcional());
+
+        if (tipo2 == TipoExpressao.NONE) {
+            return tipo1;
+        } else if (TipoExpressao.mergeTipos(tipo1, tipo2) == TipoExpressao.UNDEFINED) { // verifica, para A op B, type(A) dá merge com type(B)
+            return TipoExpressao.UNDEFINED;
+        } else {
+            return TipoExpressao.LOGICO;
+        }
+    }
+
+    @Override
+    public Object visitOp_opcional(LAParser.Op_opcionalContext ctx) {
+        if (ctx.op_relacional() != null) {
+            return visitExp_aritmetica(ctx.exp_aritmetica());
+        } else {
+            return TipoExpressao.NONE;
+        }
+    }
+
+    @Override
+    public Object visitTermo_logico(LAParser.Termo_logicoContext ctx) {
+        TipoExpressao tipo1 = (TipoExpressao) visitFator_logico(ctx.fator_logico());
+        TipoExpressao tipo2 = (TipoExpressao) visitOutros_fatores_logicos(ctx.outros_fatores_logicos());
+
+        return TipoExpressao.mergeTipos(tipo1, tipo2);
+    }
+
+    @Override
+    public Object visitOp_nao(LAParser.Op_naoContext ctx) {
+        if (ctx.nao == null) {
+            return TipoExpressao.NONE;
+        } else {
+            return TipoExpressao.LOGICO;
+        }
+    }
+
+    @Override
+    public Object visitFator_logico(LAParser.Fator_logicoContext ctx) {
+        TipoExpressao tipo1 = (TipoExpressao) visitOp_nao(ctx.op_nao());
+        TipoExpressao tipo2 = (TipoExpressao) visitParcela_logica(ctx.parcela_logica());
+
+        return TipoExpressao.mergeTipos(tipo1, tipo2);
+    }
+
+    @Override
+    public Object visitOutros_termos(LAParser.Outros_termosContext ctx) {
+        if (ctx.termo() == null) { // não possui termo
+            return TipoExpressao.NONE;
+        } else {
+            TipoExpressao tipo1 = (TipoExpressao) visitTermo(ctx.termo());
+            TipoExpressao tipo2 = (TipoExpressao) visitOutros_termos(ctx.outros_termos());
+
+            return TipoExpressao.mergeTipos(tipo1, tipo2);
+        }
+    }
+
+    @Override
+    public Object visitFator(LAParser.FatorContext ctx) {
+        TipoExpressao tipo1 = (TipoExpressao) visitParcela(ctx.parcela());
+        TipoExpressao tipo2 = (TipoExpressao) visitOutras_parcelas(ctx.outras_parcelas());
+
+        return TipoExpressao.mergeTipos(tipo1, tipo2);
+    }
+
+    @Override
+    public Object visitTermo(LAParser.TermoContext ctx) {
+        TipoExpressao tipo1 = (TipoExpressao) visitFator(ctx.fator());
+        TipoExpressao tipo2 = (TipoExpressao) visitOutros_fatores(ctx.outros_fatores());
+
+        return TipoExpressao.mergeTipos(tipo1, tipo2);
+    }
+
+    @Override
+    public Object visitOutros_termos_logicos(LAParser.Outros_termos_logicosContext ctx) {
+        if (ctx.termo_logico() == null) { // não possui termo lógico
+            return TipoExpressao.NONE;
+        } else {
+            // TODO provavelmente tipo1 é inútil
+            
+            TipoExpressao tipo1 = TipoExpressao.LOGICO;
+            TipoExpressao tipo2 = (TipoExpressao) visitTermo_logico(ctx.termo_logico());
+            TipoExpressao tipo3 = (TipoExpressao) visitOutros_termos_logicos(ctx.outros_termos_logicos());
+
+            return TipoExpressao.mergeTipos(tipo1, TipoExpressao.mergeTipos(tipo2, tipo3));
+        }
     }
 
     private void tryToAddVariable(String nome, String tipo, int line) {

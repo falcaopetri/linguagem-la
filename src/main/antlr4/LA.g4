@@ -315,7 +315,7 @@ expressao : termo_logico outros_termos_logicos;
 /*
 55. <op_nao> ::= nao | ε
 */
-op_nao : 'nao' | ;
+op_nao : nao='nao' | ;
 
 /*
 56. <termo_logico> ::= <fator_logico> <outros_fatores_logicos>
