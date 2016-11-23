@@ -46,7 +46,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
                 Saida.println("Linha " + ident.getSymbol().getLine() + ": identificador " + ident.getText() + " nao declarado", true);
             }
         }
-        return super.visitCmd(ctx); //To change body of generated methods, choose Tools | Templates.
+        return super.visitCmd(ctx);
     }
 
     @Override
@@ -85,10 +85,9 @@ public class AnalisadorSemantico extends LABaseVisitor {
 
                 if (!ts.existeSimbolo(parametro.tipo_estendido().getText()) || !"tipo".equals(ts.getSimbolo(parametro.tipo_estendido().getText()).getTipo())) {
                     Saida.println("Linha " + parametro.tipo_estendido().getStart().getLine() + ": tipo " + parametro.tipo_estendido().getText() + " nao declarado");
-                    ep.addParametro(identificador.getText(), parametro.tipo_estendido().getText());
-                } else {
-                    ep.addParametro(identificador.getText(), parametro.tipo_estendido().getText());
                 }
+
+                ep.addParametro(identificador.getText(), parametro.tipo_estendido().getText());
 
                 while (maisIdent != null) {
                     identificador = maisIdent.identificador();
@@ -149,11 +148,6 @@ public class AnalisadorSemantico extends LABaseVisitor {
             }
         }
         return super.visitParcela_unario(ctx);
-    }
-
-    @Override
-    public Object visitParcela_nao_unario(LAParser.Parcela_nao_unarioContext ctx) {
-        return super.visitParcela_nao_unario(ctx); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override

@@ -39,7 +39,9 @@ public class EntradaTSParam extends EntradaTS {
         EntradaTSParam e1 = (EntradaTSParam) obj;
         if (this.listaParametros.size() == e1.contarParametros()) {
             for (int i = e1.contarParametros(); i >= 0; i--) {
-                if (!this.listaParametros.get(i).getTipo().equals(e1.listaParametros.get(i).getTipo())) {
+                String tipo1 = this.listaParametros.get(i).getTipo();
+                String tipo2 = e1.listaParametros.get(i).getTipo();
+                if (!tipo1.equals(tipo2)) {
                     return false;
                 }
             }
