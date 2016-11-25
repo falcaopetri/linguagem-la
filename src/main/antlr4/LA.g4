@@ -159,8 +159,8 @@ cmd :   'leia' '(' identificador mais_ident ')' |
         'para' IDENT '<-' exp_aritmetica 'ate' exp_aritmetica 'faca' comandos 'fim_para' |
         'enquanto' expressao 'faca' comandos 'fim_enquanto' |
         'faca' comandos 'ate' expressao |
-        '^' IDENT outros_ident dimensao '<-' expressao |
-        IDENT chamada_atribuicao |
+        '^' atr_ponteiro=IDENT outros_ident dimensao '<-' expressao |
+        atr_normal=IDENT chamada_atribuicao |
         'retorne' retorno=expressao;
 
 /*
