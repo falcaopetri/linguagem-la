@@ -31,8 +31,7 @@ public class PilhaDeTabelas {
         }
         return false;
     }
-    
-    
+
     public EntradaTS getSimbolo(String nome) {
         for (TabelaDeSimbolos ts : pilha) {
             EntradaTS entry = ts.getSimbolo(nome);
@@ -45,10 +44,20 @@ public class PilhaDeTabelas {
 
     public void desempilhar() {
         TabelaDeSimbolos ret = pilha.pop();
-        Saida.println(ret.toString());
+        // Saida.println(ret.toString());
     }
 
-    public List getTodasTabelas() {
+    public List<TabelaDeSimbolos> getTodasTabelas() {
         return pilha;
     }
+
+    @Override
+    public String toString() {
+        String r = "";
+        for (TabelaDeSimbolos t : getTodasTabelas()) {
+            r += t.toString();
+        }
+        return r;
+    }
+
 }

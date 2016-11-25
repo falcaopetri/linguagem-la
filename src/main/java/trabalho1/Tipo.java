@@ -9,14 +9,17 @@ package trabalho1;
  *
  * @author petri
  */
-
 enum Tipo {
     NONE, LOGICO, INTEIRO, REAL, PONTEIRO, ENDERECO, LITERAL, REGISTRO, FUNC_PROC, UNDEFINED, TIPO;
-    
+
     static Tipo mergeTipos(Tipo first, Tipo second) {
-        if (first == null || first == Tipo.NONE) return second;
-        if (second == null || second == Tipo.NONE) return first;
-        
+        if (first == null || first == Tipo.NONE) {
+            return second;
+        }
+        if (second == null || second == Tipo.NONE) {
+            return first;
+        }
+
         if ((first == Tipo.REAL || first == Tipo.INTEIRO) && (second == Tipo.REAL || second == Tipo.INTEIRO)) {
             // TODO se first e second são INTEIROs, não faz sentido transformar o tipo para REAL
             return Tipo.REAL;
@@ -47,5 +50,13 @@ enum Tipo {
         }
 
         return false;
+    }
+
+    static boolean checkFuncParameters(Tipo first, Tipo second) {
+        if (first == Tipo.PONTEIRO && second == Tipo.ENDERECO) {
+            return true;
+        }
+
+        return first == second;
     }
 }

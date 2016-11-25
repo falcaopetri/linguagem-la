@@ -14,10 +14,22 @@ import java.util.ArrayList;
 public class EntradaTSParam extends EntradaTS {
 
     private ArrayList<Param> listaParametros;
+    private Tipo returnType;
 
-    public EntradaTSParam(String nome) {
+    public EntradaTSParam(String nome, Tipo return_type) {
         super(nome, Tipo.FUNC_PROC);
+        this.returnType = return_type;
         listaParametros = new ArrayList<>();
+    }
+
+    public EntradaTSParam(String nome, Tipo return_type, ArrayList<Param> params) {
+        super(nome, Tipo.FUNC_PROC);
+        this.returnType = return_type;
+        listaParametros = params;
+    }
+
+    public Tipo getReturnType() {
+        return returnType;
     }
 
     public int contarParametros() {
@@ -38,12 +50,12 @@ public class EntradaTSParam extends EntradaTS {
 
         EntradaTSParam e1 = (EntradaTSParam) obj;
         if (this.listaParametros.size() == e1.contarParametros()) {
-            for (int i = e1.contarParametros(); i >= 0; i--) {
+            for (int i = 0; i < contarParametros(); i++) {
                 Tipo tipo1 = this.listaParametros.get(i).getTipo();
                 Tipo tipo2 = e1.listaParametros.get(i).getTipo();
-                
+
                 // TODO possivelmente esse check não é o que a gente espera
-                if (!Tipo.checkAtribuicao(tipo1, tipo2)) {
+                if (!Tipo.checkFuncParameters(tipo1, tipo2)) {
                     return false;
                 }
             }

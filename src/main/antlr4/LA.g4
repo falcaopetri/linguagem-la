@@ -102,8 +102,8 @@ registro : 'registro' variavel mais_variaveis 'fim_registro';
 19. <declaracao_global> ::= procedimento IDENT ( <parametros_opcional> ) <declaracoes_locais> <comandos> fim_procedimento
  | funcao IDENT ( <parametros_opcional> ) : <tipo_estendido> <declaracoes_locais> <comandos> fim_funcao
 */
-declaracao_global : 'procedimento' IDENT '(' parametros_opcional ')' declaracoes_locais comandos 'fim_procedimento' |
-                    'funcao' IDENT '(' parametros_opcional ')' ':' tipo_estendido declaracoes_locais comandos 'fim_funcao';
+declaracao_global : 'procedimento' proc=IDENT '(' parametros_opcional ')' declaracoes_locais comandos 'fim_procedimento' |
+                    'funcao' func=IDENT '(' parametros_opcional ')' ':' tipo_estendido declaracoes_locais comandos 'fim_funcao';
 
 /*
 20. <parametros_opcional> ::= <parametro> | ε

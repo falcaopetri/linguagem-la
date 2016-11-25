@@ -1,5 +1,6 @@
 package trabalho1;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import main.antlr4.LABaseVisitor;
 import main.antlr4.LAParser;
@@ -54,18 +55,29 @@ public class AnalisadorSemantico extends LABaseVisitor {
         }
 
         Tipo tipo_ident = ts.getSimbolo(ident.getText()).getTipo();
+
+        // Força a passagem do caso de Teste 14
+        String dimensao = "";
+        if (ctx.dimensao() != null) {
+            dimensao = ctx.dimensao().getText();
+        } else if (ctx.chamada_atribuicao() != null) {
+            if (ctx.chamada_atribuicao().dimensao() != null) {
+                dimensao = ctx.chamada_atribuicao().dimensao().getText();
+            }
+        }
+
         if (ctx.atr_ponteiro != null) {
             System.out.println(ts.getSimbolo(ident.getText()).isPointer());
             Tipo tipo = (Tipo) visitExpressao(ctx.expressao());
 
             if (!Tipo.checkAtribuicao(tipo, tipo_ident)) {
-                Saida.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": atribuicao nao compativel para ^" + ctx.IDENT(), true);
+                Saida.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": atribuicao nao compativel para ^" + ctx.IDENT() + dimensao, true);
             }
         } else if (ctx.atr_normal != null) {
             Tipo tipo = (Tipo) visitChamada_atribuicao(ctx.chamada_atribuicao());
 
             if (!Tipo.checkAtribuicao(tipo, tipo_ident)) {
-                Saida.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": atribuicao nao compativel para " + ctx.IDENT(), true);
+                Saida.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": atribuicao nao compativel para " + ctx.IDENT() + dimensao, true);
             }
         }
 
@@ -106,19 +118,30 @@ public class AnalisadorSemantico extends LABaseVisitor {
     @Override
     public Object visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) {
         // inicia empty function struct
-        EntradaTSParam ep = new EntradaTSParam(ctx.IDENT().getText());
+        EntradaTSParam ep = null;
+
+        if (ctx.proc != null) {
+            ep = new EntradaTSParam(ctx.IDENT().getText(), Tipo.UNDEFINED);
+        } else {
+            // TODO tipo_extendido não sendo tratado: não funciona com ponteiros
+            ep = new EntradaTSParam(ctx.IDENT().getText(), Tipo.valueOf(ctx.tipo_estendido().tipo_basico_ident().getText().toUpperCase()));
+        }
+
+        ts.empilhar(new TabelaDeSimbolos(ctx.IDENT().getText()));
+
         if (ctx.parametros_opcional().parametro() != null) {
             LAParser.ParametroContext parametro = ctx.parametros_opcional().parametro();
             LAParser.Mais_identContext maisIdent = ctx.parametros_opcional().parametro().mais_ident();
             while (parametro != null) {
                 LAParser.IdentificadorContext identificador = parametro.identificador();
 
-                if (!ts.existeSimbolo(parametro.tipo_estendido().getText()) || !"tipo".equals(ts.getSimbolo(parametro.tipo_estendido().getText()).getTipo())) {
+                if (!ts.existeSimbolo(parametro.tipo_estendido().getText()) || ts.getSimbolo(parametro.tipo_estendido().getText()).getTipo() != Tipo.TIPO) {
                     Saida.println("Linha " + parametro.tipo_estendido().getStart().getLine() + ": tipo " + parametro.tipo_estendido().getText() + " nao declarado");
                 }
 
-                Tipo tipo = Tipo.valueOf(parametro.tipo_estendido().getText());
+                Tipo tipo = Tipo.valueOf(parametro.tipo_estendido().getText().toUpperCase());
                 ep.addParametro(identificador.getText(), tipo);
+                ts.topo().adicionarSimbolo(identificador.getText(), tipo);
 
                 while (maisIdent != null) {
                     identificador = maisIdent.identificador();
@@ -132,20 +155,19 @@ public class AnalisadorSemantico extends LABaseVisitor {
                     }
 
                     ep.addParametro(identificador.getText(), tipo);
+                    ts.topo().adicionarSimbolo(identificador.getText(), tipo);
 
                     maisIdent = maisIdent.mais_ident();
                 }
                 parametro = parametro.mais_parametros().parametro();
             }
-            tryToAddFunc(ep, ctx.getStart().getLine());
         }
 
-        /*
-        19. <declaracao_global> ::= procedimento IDENT ( <parametros_opcional> ) <declaracoes_locais> <comandos> fim_procedimento
-                                    | funcao IDENT ( <parametros_opcional> ) : <tipo_estendido> <declaracoes_locais> <comandos> fim_funcao
-         */ // TODO vai ser necessário armazenar os parâmetros formais do procedimento/funcao para satisfazer a Regra Semântica 4:
-        // 4) Incompatibilidade entre argumentos e parâmetros formais (número, ordem e tipo) na chamada de um procedimento ou uma função
-        return super.visitDeclaracao_global(ctx);
+        super.visitDeclaracao_global(ctx);
+        ts.desempilhar();
+        tryToAddFunc(ep, ctx.getStart().getLine());
+
+        return null;
     }
 
     @Override
@@ -169,12 +191,45 @@ public class AnalisadorSemantico extends LABaseVisitor {
     }
 
     @Override
+    public Object visitChamada_partes(LAParser.Chamada_partesContext ctx) {
+        ArrayList<Param> params = new ArrayList<>();
+
+        if (ctx.expressao() != null) {
+            params.add(new Param("", (Tipo) visitExpressao(ctx.expressao())));
+
+            LAParser.Mais_expressaoContext mais_expressao = ctx.mais_expressao();
+            while (mais_expressao != null && mais_expressao.expressao() != null) {
+                params.add(new Param("", (Tipo) visitExpressao(mais_expressao.expressao())));
+
+                mais_expressao = mais_expressao.mais_expressao();
+            }
+        }
+
+        return params;
+    }
+
+    @Override
     public Object visitParcela_unario(LAParser.Parcela_unarioContext ctx) {
         if (ctx.IDENT() != null) {
             TerminalNode ident = ctx.IDENT();
+            System.out.println(ident.getText());
             if (!ts.existeSimbolo(ident.getText())) {
                 Saida.println("Linha " + ident.getSymbol().getLine() + ": identificador " + ident.getText() + " nao declarado", true);
-            } else if (ctx.chamada_partes() != null) {
+            } else if (ctx.chamada_partes() != null && ctx.chamada_partes().expressao() != null) {
+                if (ts.getSimbolo(ctx.IDENT().getText()).getTipo() != Tipo.FUNC_PROC) {
+                    return Tipo.UNDEFINED;
+                }
+
+                EntradaTSParam func_proc = (EntradaTSParam) ts.getSimbolo(ctx.IDENT().getText());
+                ArrayList<Param> params = (ArrayList<Param>) visitChamada_partes(ctx.chamada_partes());
+
+                if (!func_proc.equals(new EntradaTSParam("", Tipo.NONE, params))) {
+                    Saida.println("Linha " + ident.getSymbol().getLine() + ": incompatibilidade de parametros na chamada de " + ctx.IDENT(), true);
+                    return Tipo.UNDEFINED;
+                } else {
+                    return func_proc.getReturnType();
+                }
+            } else {
                 return ts.getSimbolo(ctx.IDENT().getText()).getTipo();
             }
         }
@@ -191,7 +246,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
             return visitExpressao(ctx.expressao());
         }
 
-        return super.visitParcela_unario(ctx);
+        return null;
     }
 
     @Override
@@ -212,6 +267,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
         if (ctx.CADEIA() != null) {
             return Tipo.LITERAL;
         }
+        
         return super.visitParcela_nao_unario(ctx);
     }
 
