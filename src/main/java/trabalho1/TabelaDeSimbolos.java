@@ -26,16 +26,27 @@ public class TabelaDeSimbolos {
             simbolos.add(new EntradaTS(s, tipo));
         }
     }
-    
+
     public void adicionarEntrada(EntradaTS entrada) {
         simbolos.add(entrada);
     }
-    
 
     public boolean existeSimbolo(String nome) {
         for (EntradaTS etds : simbolos) {
-            if (etds.getNome().equals(nome)) {
-                return true;
+            String nomes[] = nome.split("\\.", 2);
+            if (etds.getNome().equals(nomes[0])) {
+                if (etds.getTipo() instanceof TipoEnum) {
+                    return nomes.length == 1;
+                } else if (etds.getTipo() instanceof TipoEstendido) {
+                    TipoEstendido tipo = (TipoEstendido) etds.getTipo();
+                    EntradaTSRegistro registro = (EntradaTSRegistro) getSimbolo(tipo.tipo_estendido);
+
+                    if (nomes.length == 1) {
+                        return true;
+                    } else if (registro.existeSimbolo(nomes[1])) {
+                        return true;
+                    }
+                }
             }
         }
         return false;
@@ -43,8 +54,25 @@ public class TabelaDeSimbolos {
 
     public EntradaTS getSimbolo(String nome) {
         for (EntradaTS etds : simbolos) {
-            if (etds.getNome().equals(nome)) {
-                return etds;
+            String nomes[] = nome.split("\\.", 2);
+            if (etds.getNome().equalsIgnoreCase(nomes[0])) {
+                if (etds.getTipo() instanceof TipoEnum) {
+                    if (nomes.length == 1) {
+                        return etds;
+                    }
+                    else {
+                        return null;
+                    }
+                } else if (etds.getTipo() instanceof TipoEstendido) {
+                    TipoEstendido tipo = (TipoEstendido) etds.getTipo();
+                    EntradaTSRegistro registro = (EntradaTSRegistro) getSimbolo(tipo.tipo_estendido);
+
+                    if (nomes.length == 1) {
+                        return etds;
+                    } else if (registro.existeSimbolo(nomes[1])) {
+                        return registro.getTabela().getSimbolo(nomes[1]);
+                    }
+                }
             }
         }
         return null;
@@ -57,5 +85,13 @@ public class TabelaDeSimbolos {
             ret += "\n   " + etds;
         }
         return ret;
+    }
+
+    void setNome(String registro_nome) {
+        escopo = registro_nome;
+    }
+
+    String getNome() {
+        return escopo;
     }
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import main.antlr4.LABaseVisitor;
 import main.antlr4.LAParser;
+import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class AnalisadorSemantico extends LABaseVisitor {
@@ -25,7 +26,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
             longo do programa foi declarado anteriormente.
          */
         // TODO "tipo" deveria ser um ENUM
-        global.adicionarSimbolos(Arrays.asList("literal", "inteiro", "real", "logico"), Tipo.TIPO);
+        global.adicionarSimbolos(Arrays.asList("literal", "inteiro", "real", "logico"), TipoEnum.TIPO);
 
         ts.empilhar(global);
     }
@@ -46,15 +47,20 @@ public class AnalisadorSemantico extends LABaseVisitor {
 
         TerminalNode ident = ctx.IDENT();
         if (!ts.existeSimbolo(ident.getText())) {
-            Saida.println("Linha " + ident.getSymbol().getLine() + ": identificador " + ident.getText() + " nao declarado", true);
+            String ident_name;
+            if (ctx.chamada_atribuicao() != null) {
+                Pair<String, Tipo> par = (Pair<String, Tipo>) visitChamada_atribuicao(ctx.chamada_atribuicao());
+                ident_name = par.a;
+            } else {
+                ident_name = ident.getText();
+            }
+            Saida.println("Linha " + ident.getSymbol().getLine() + ": identificador " + ident_name + " nao declarado", true);
             return super.visitCmd(ctx);
         }
 
         if (ctx.atr_normal == null && ctx.atr_ponteiro == null) {
             return super.visitCmd(ctx);
         }
-
-        Tipo tipo_ident = ts.getSimbolo(ident.getText()).getTipo();
 
         // Força a passagem do caso de Teste 14
         String dimensao = "";
@@ -67,17 +73,20 @@ public class AnalisadorSemantico extends LABaseVisitor {
         }
 
         if (ctx.atr_ponteiro != null) {
-            System.out.println(ts.getSimbolo(ident.getText()).isPointer());
             Tipo tipo = (Tipo) visitExpressao(ctx.expressao());
-
+            Tipo tipo_ident = (Tipo) ts.getSimbolo(ident.getText()).getTipo();
             if (!Tipo.checkAtribuicao(tipo, tipo_ident)) {
                 Saida.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": atribuicao nao compativel para ^" + ctx.IDENT() + dimensao, true);
             }
-        } else if (ctx.atr_normal != null) {
-            Tipo tipo = (Tipo) visitChamada_atribuicao(ctx.chamada_atribuicao());
+        } else if (ctx.atr_normal != null && ctx.chamada_atribuicao().expressao() != null) {
+            Pair<String, Tipo> par = (Pair<String, Tipo>) visitChamada_atribuicao(ctx.chamada_atribuicao());
+            String ident_name = ident.getText() + par.a;
+            Tipo tipo = par.b;
+
+            Tipo tipo_ident = (Tipo) ts.getSimbolo(ident_name).getTipo();
 
             if (!Tipo.checkAtribuicao(tipo, tipo_ident)) {
-                Saida.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": atribuicao nao compativel para " + ctx.IDENT() + dimensao, true);
+                Saida.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": atribuicao nao compativel para " + ident_name + dimensao, true);
             }
         }
 
@@ -91,15 +100,24 @@ public class AnalisadorSemantico extends LABaseVisitor {
         boolean is_pointer;
 
         if (ctx.tipo().registro() != null) {
-            tipo = ctx.tipo().registro().getText();
+            // TODO
+            TabelaDeSimbolos registro_ts = (TabelaDeSimbolos) visitRegistro(ctx.tipo().registro());
+
+            EntradaTSRegistro registro = new EntradaTSRegistro(registro_ts.getNome(), registro_ts);
+            ts.topo().adicionarEntrada(registro);
+            TipoEstendido.addTipo(registro.getNome());
+
+            tipo = registro.getNome();
             is_pointer = false;
         } else {
             tipo = ctx.tipo().tipo_estendido().tipo_basico_ident().getText();
-            is_pointer = true;
+            // TODO qual a lógica correta para isso?
+            is_pointer = false;
+            //is_pointer = true;
         }
 
         // FIXME Check não muito eficiente: percorre as tabelas de símbolos 2 vezes
-        if (!ts.existeSimbolo(tipo) || ts.getSimbolo(tipo).getTipo() != Tipo.TIPO) {
+        if (!ts.existeSimbolo(tipo) || (ts.getSimbolo(tipo).getTipo() != TipoEnum.TIPO && ts.getSimbolo(tipo).getTipo() != TipoEnum.REGISTRO)) {
             Saida.println("Linha " + ctx.tipo().getStart().getLine() + ": tipo " + tipo + " nao declarado", true);
         }
 
@@ -112,7 +130,8 @@ public class AnalisadorSemantico extends LABaseVisitor {
             mais_var = mais_var.mais_var();
         }
 
-        return super.visitVariavel(ctx);
+        return null;
+        //return super.visitVariavel(ctx);
     }
 
     @Override
@@ -121,7 +140,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
         EntradaTSParam ep = null;
 
         if (ctx.proc != null) {
-            ep = new EntradaTSParam(ctx.IDENT().getText(), Tipo.UNDEFINED);
+            ep = new EntradaTSParam(ctx.IDENT().getText(), TipoEnum.UNDEFINED);
         } else {
             // TODO tipo_extendido não sendo tratado: não funciona com ponteiros
             ep = new EntradaTSParam(ctx.IDENT().getText(), Tipo.valueOf(ctx.tipo_estendido().tipo_basico_ident().getText().toUpperCase()));
@@ -135,7 +154,8 @@ public class AnalisadorSemantico extends LABaseVisitor {
             while (parametro != null) {
                 LAParser.IdentificadorContext identificador = parametro.identificador();
 
-                if (!ts.existeSimbolo(parametro.tipo_estendido().getText()) || ts.getSimbolo(parametro.tipo_estendido().getText()).getTipo() != Tipo.TIPO) {
+                if (!ts.existeSimbolo(parametro.tipo_estendido().getText()) || (ts.getSimbolo(parametro.tipo_estendido().getText()).getTipo() != TipoEnum.TIPO
+                        && ts.getSimbolo(parametro.tipo_estendido().getText()).getTipo() != TipoEnum.REGISTRO)) {
                     Saida.println("Linha " + parametro.tipo_estendido().getStart().getLine() + ": tipo " + parametro.tipo_estendido().getText() + " nao declarado");
                 }
 
@@ -150,7 +170,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
                         break;
                     }
 
-                    if (!ts.existeSimbolo(identificador.getText()) || ts.getSimbolo(parametro.tipo_estendido().getText()).getTipo() != Tipo.TIPO) {
+                    if (!ts.existeSimbolo(identificador.getText()) || ts.getSimbolo(parametro.tipo_estendido().getText()).getTipo() != TipoEnum.TIPO) {
                         Saida.println("Linha " + parametro.tipo_estendido().getStart().getLine() + ": tipo " + parametro.tipo_estendido().getText() + " nao declarado");
                     }
 
@@ -183,11 +203,41 @@ public class AnalisadorSemantico extends LABaseVisitor {
             if (ctx.tipo_basico() != null) { // constante IDENT : <tipo_basico> = <valor_constante>
                 tryToAddVariable(ctx.IDENT().getText(), ctx.tipo_basico().getText(), false, ctx.getStart().getLine());
             } else if (ctx.tipo() != null) { // tipo IDENT : <tipo>
-                // TODO
                 // try to add tipo
+                if (ctx.tipo().tipo_estendido() != null) {
+                    // TODO nenhum caso de teste cobre esse caso
+                } else if (ctx.tipo().registro() != null) {
+                    String registro_nome = ctx.IDENT().getText();
+                    TabelaDeSimbolos registro_ts = (TabelaDeSimbolos) visitRegistro(ctx.tipo().registro());
+                    registro_ts.setNome(registro_nome);
+
+                    EntradaTSRegistro registro = new EntradaTSRegistro(registro_nome, registro_ts);
+                    ts.topo().adicionarEntrada(registro);
+                    TipoEstendido.addTipo(registro.getNome());
+                }
+                return null;
             }
         }
         return super.visitDeclaracao_local(ctx);
+    }
+
+    @Override
+    public Object visitRegistro(LAParser.RegistroContext ctx) {
+        String random = "random-string";
+        ts.empilhar(new TabelaDeSimbolos(random));
+        visitVariavel(ctx.variavel());
+
+        LAParser.Mais_variaveisContext mais_variaveis = ctx.mais_variaveis();
+        while (mais_variaveis != null && mais_variaveis.variavel() != null) {
+            visitVariavel(mais_variaveis.variavel());
+
+            mais_variaveis = mais_variaveis.mais_variaveis();
+        }
+
+        TabelaDeSimbolos ts_registro = ts.topo();
+        ts.desempilhar();
+
+        return ts_registro;
     }
 
     @Override
@@ -208,38 +258,65 @@ public class AnalisadorSemantico extends LABaseVisitor {
         return params;
     }
 
+    String getFullIdentifier(LAParser.Parcela_unarioContext ctx) {
+        // TODO getFullIdentifier simplesmente ignora <dimensao>
+        assert ctx.IDENT() != null;
+
+        if (ctx.dimensao() != null) {
+            // ^ IDENT <outros_ident> <dimensao>
+
+        } else //  IDENT <chamada_partes> 
+         if (ctx.chamada_partes() == null || ctx.chamada_partes().outros_ident() == null) {
+                return ctx.IDENT().getText();
+            } else {
+                String ident = ctx.IDENT().getText();
+                // <outros_ident> <dimensao> 
+                LAParser.Outros_identContext outros = ctx.chamada_partes().outros_ident();
+
+                while (outros != null && outros.identificador() != null) {
+                    ident += "." + outros.identificador().IDENT().getText();
+                    outros = outros.identificador().outros_ident();
+                }
+
+                return ident;
+            }
+
+        return "";
+    }
+
     @Override
     public Object visitParcela_unario(LAParser.Parcela_unarioContext ctx) {
         if (ctx.IDENT() != null) {
             TerminalNode ident = ctx.IDENT();
-            System.out.println(ident.getText());
-            if (!ts.existeSimbolo(ident.getText())) {
-                Saida.println("Linha " + ident.getSymbol().getLine() + ": identificador " + ident.getText() + " nao declarado", true);
+            String ident_name = getFullIdentifier(ctx);
+            // TODO existeSimbolo() deve percorrer registros
+            if (!ts.existeSimbolo(ident_name)) {
+                Saida.println("Linha " + ident.getSymbol().getLine() + ": identificador " + ident_name + " nao declarado", true);
             } else if (ctx.chamada_partes() != null && ctx.chamada_partes().expressao() != null) {
-                if (ts.getSimbolo(ctx.IDENT().getText()).getTipo() != Tipo.FUNC_PROC) {
-                    return Tipo.UNDEFINED;
+                if (ts.getSimbolo(ident_name).getTipo() != TipoEnum.FUNC_PROC) {
+                    return TipoEnum.UNDEFINED;
                 }
 
-                EntradaTSParam func_proc = (EntradaTSParam) ts.getSimbolo(ctx.IDENT().getText());
+                EntradaTSParam func_proc = (EntradaTSParam) ts.getSimbolo(ident_name);
                 ArrayList<Param> params = (ArrayList<Param>) visitChamada_partes(ctx.chamada_partes());
 
-                if (!func_proc.equals(new EntradaTSParam("", Tipo.NONE, params))) {
-                    Saida.println("Linha " + ident.getSymbol().getLine() + ": incompatibilidade de parametros na chamada de " + ctx.IDENT(), true);
-                    return Tipo.UNDEFINED;
+                if (!func_proc.equals(new EntradaTSParam("", TipoEnum.NONE, params))) {
+                    Saida.println("Linha " + ident.getSymbol().getLine() + ": incompatibilidade de parametros na chamada de " + ident_name, true);
+                    return TipoEnum.UNDEFINED;
                 } else {
                     return func_proc.getReturnType();
                 }
             } else {
-                return ts.getSimbolo(ctx.IDENT().getText()).getTipo();
+                return ts.getSimbolo(ident_name).getTipo();
             }
         }
 
         if (ctx.NUM_INT() != null) {
-            return Tipo.INTEIRO;
+            return TipoEnum.INTEIRO;
         }
 
         if (ctx.NUM_REAL() != null) {
-            return Tipo.REAL;
+            return TipoEnum.REAL;
         }
 
         if (ctx.expressao() != null) {
@@ -250,13 +327,27 @@ public class AnalisadorSemantico extends LABaseVisitor {
     }
 
     @Override
+    public Object visitOutros_ident(LAParser.Outros_identContext ctx) {
+        // TODO simplesmente ignora <dimensao>
+        String partial_ident = "";
+        // <outros_ident> <dimensao> 
+        LAParser.Outros_identContext outros = ctx;
+
+        while (outros != null && outros.identificador() != null) {
+            partial_ident += "." + outros.identificador().IDENT().getText();
+            outros = outros.identificador().outros_ident();
+        }
+
+        return partial_ident;
+    }
+
+    @Override
     public Object visitChamada_atribuicao(LAParser.Chamada_atribuicaoContext ctx) {
         if (ctx.expressao() != null) {
-            visitOutros_ident(ctx.outros_ident());
-            visitDimensao(ctx.dimensao());
+            String partial_ident = (String) visitOutros_ident(ctx.outros_ident());
             Tipo tipo = (Tipo) visitExpressao(ctx.expressao());
 
-            return tipo;
+            return new Pair<String, Tipo>(partial_ident, tipo);
         } else {
             return super.visitChamada_atribuicao(ctx);
         }
@@ -265,9 +356,9 @@ public class AnalisadorSemantico extends LABaseVisitor {
     @Override
     public Object visitParcela_nao_unario(LAParser.Parcela_nao_unarioContext ctx) {
         if (ctx.CADEIA() != null) {
-            return Tipo.LITERAL;
+            return TipoEnum.LITERAL;
         }
-        
+
         return super.visitParcela_nao_unario(ctx);
     }
 
@@ -284,7 +375,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
     @Override
     public Object visitParcela_logica(LAParser.Parcela_logicaContext ctx) {
         if (ctx.exp_relacional() == null) {
-            return Tipo.LOGICO;
+            return TipoEnum.LOGICO;
         } else {
             return visitExp_relacional(ctx.exp_relacional());
         }
@@ -294,9 +385,11 @@ public class AnalisadorSemantico extends LABaseVisitor {
     public Object visitIdentificador(LAParser.IdentificadorContext ctx) {
         TerminalNode ident = ctx.IDENT();
 
+        String ident_name = ident.getText() + visitOutros_ident(ctx.outros_ident()).toString();
         // TODO add checking ts.getSimbolo(ident.getText()).getTipo() not in TIPOS
-        if (!ts.existeSimbolo(ident.getText())) {
-            Saida.println("Linha " + ident.getSymbol().getLine() + ": identificador " + ident.getText() + " nao declarado", true);
+        // TODO existeSimbolo() deve percorrer registros
+        if (!ts.existeSimbolo(ident_name)) {
+            Saida.println("Linha " + ident.getSymbol().getLine() + ": identificador " + ident_name + " nao declarado", true);
         }
 
         return super.visitIdentificador(ctx);
@@ -323,12 +416,12 @@ public class AnalisadorSemantico extends LABaseVisitor {
         Tipo tipo1 = (Tipo) visitExp_aritmetica(ctx.exp_aritmetica());
         Tipo tipo2 = (Tipo) visitOp_opcional(ctx.op_opcional());
 
-        if (tipo2 == Tipo.NONE) {
+        if (tipo2 == TipoEnum.NONE) {
             return tipo1;
-        } else if (Tipo.mergeTipos(tipo1, tipo2) == Tipo.UNDEFINED) { // verifica, para A op B, type(A) dá merge com type(B)
-            return Tipo.UNDEFINED;
+        } else if (Tipo.mergeTipos(tipo1, tipo2) == TipoEnum.UNDEFINED) { // verifica, para A op B, type(A) dá merge com type(B)
+            return TipoEnum.UNDEFINED;
         } else {
-            return Tipo.LOGICO;
+            return TipoEnum.LOGICO;
         }
     }
 
@@ -337,7 +430,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
         if (ctx.op_relacional() != null) {
             return visitExp_aritmetica(ctx.exp_aritmetica());
         } else {
-            return Tipo.NONE;
+            return TipoEnum.NONE;
         }
     }
 
@@ -352,9 +445,9 @@ public class AnalisadorSemantico extends LABaseVisitor {
     @Override
     public Object visitOp_nao(LAParser.Op_naoContext ctx) {
         if (ctx.nao == null) {
-            return Tipo.NONE;
+            return TipoEnum.NONE;
         } else {
-            return Tipo.LOGICO;
+            return TipoEnum.LOGICO;
         }
     }
 
@@ -369,7 +462,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
     @Override
     public Object visitOutros_termos(LAParser.Outros_termosContext ctx) {
         if (ctx.termo() == null) { // não possui termo
-            return Tipo.NONE;
+            return TipoEnum.NONE;
         } else {
             Tipo tipo1 = (Tipo) visitTermo(ctx.termo());
             Tipo tipo2 = (Tipo) visitOutros_termos(ctx.outros_termos());
@@ -397,11 +490,11 @@ public class AnalisadorSemantico extends LABaseVisitor {
     @Override
     public Object visitOutros_termos_logicos(LAParser.Outros_termos_logicosContext ctx) {
         if (ctx.termo_logico() == null) { // não possui termo lógico
-            return Tipo.NONE;
+            return TipoEnum.NONE;
         } else {
             // TODO provavelmente tipo1 é inútil
 
-            Tipo tipo1 = Tipo.LOGICO;
+            Tipo tipo1 = TipoEnum.LOGICO;
             Tipo tipo2 = (Tipo) visitTermo_logico(ctx.termo_logico());
             Tipo tipo3 = (Tipo) visitOutros_termos_logicos(ctx.outros_termos_logicos());
 
@@ -410,13 +503,19 @@ public class AnalisadorSemantico extends LABaseVisitor {
     }
 
     private void tryToAddVariable(String nome, String tipo, boolean is_pointer, int line) {
+        // FIXME struct flaw: quando criando uma struct, esse método é utilizado para adicionar
+        //                      variáveis à TabelaDeSimbolos topo(). Mas caso já exista uma variável
+        //                      em outro escopo com esse mesmo nome, também vai gerar "identificador já declarado".
+        //                      Isso deveria ocorrer só se já existe dentro do mesmo escopo, um comportamento diferente
+        //                      do padrão
+
         if (ts.existeSimbolo(nome)) {
             Saida.println("Linha " + line + ": identificador " + nome + " ja declarado anteriormente", true);
         } else {
             try {
                 ts.topo().adicionarSimbolo(nome, Tipo.valueOf(tipo.toUpperCase()), is_pointer);
-            } catch (IllegalArgumentException e) {
-                ts.topo().adicionarSimbolo(nome, Tipo.NONE);
+            } catch (Exception e) {
+                ts.topo().adicionarSimbolo(nome, TipoEnum.NONE);
             }
         }
     }

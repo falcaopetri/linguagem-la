@@ -17,13 +17,11 @@ public class EntradaTSParam extends EntradaTS {
     private Tipo returnType;
 
     public EntradaTSParam(String nome, Tipo return_type) {
-        super(nome, Tipo.FUNC_PROC);
-        this.returnType = return_type;
-        listaParametros = new ArrayList<>();
+        this(nome, return_type, new ArrayList<Param>());
     }
 
     public EntradaTSParam(String nome, Tipo return_type, ArrayList<Param> params) {
-        super(nome, Tipo.FUNC_PROC);
+        super(nome, TipoEnum.FUNC_PROC);
         this.returnType = return_type;
         listaParametros = params;
     }
@@ -51,6 +49,7 @@ public class EntradaTSParam extends EntradaTS {
         EntradaTSParam e1 = (EntradaTSParam) obj;
         if (this.listaParametros.size() == e1.contarParametros()) {
             for (int i = 0; i < contarParametros(); i++) {
+                // TODO nem sempre esse casting vai ser verdade
                 Tipo tipo1 = this.listaParametros.get(i).getTipo();
                 Tipo tipo2 = e1.listaParametros.get(i).getTipo();
 
