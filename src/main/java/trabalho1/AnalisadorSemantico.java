@@ -50,7 +50,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
             String ident_name;
             if (ctx.chamada_atribuicao() != null) {
                 Pair<String, Tipo> par = (Pair<String, Tipo>) visitChamada_atribuicao(ctx.chamada_atribuicao());
-                ident_name = par.a;
+                ident_name = ident.getText() + par.a;
             } else {
                 ident_name = ident.getText();
             }
