@@ -35,7 +35,7 @@ public class Main {
         try {
             // TODO nem sempre que existe erro parser.programa() lançará exceção
             ProgramaContext aas = parser.programa();
-            
+
             if (Saida.is_modified()) {
                 // Força lançamento de exceção. Útil para exceções definidas apenas na gramática
                 throw new ParseCancellationException("Exceção gerada na gramática.");
@@ -43,14 +43,25 @@ public class Main {
 
             AnalisadorSemantico as = new AnalisadorSemantico();
             as.visitPrograma(aas);
+
+            Gerador g = new Gerador();
+            g.visitPrograma(aas);
         } catch (ParseCancellationException ex) {
 
         }
         
-        Saida.println("Fim da compilacao", true);
+        
 
-        PrintWriter outputTestCase = new PrintWriter(outputFilePath, "UTF-8");
-        outputTestCase.print(Saida.getTexto());
-        outputTestCase.close();
+        if(Saida.is_modified()){
+            Saida.println("Fim da compilacao", true);
+            PrintWriter outputTestCase = new PrintWriter(outputFilePath, "UTF-8");
+            outputTestCase.print(Saida.getTexto());
+            outputTestCase.close();        
+        }
+        else {        
+            PrintWriter outputTestCaseG = new PrintWriter(outputFilePath, "UTF-8");
+            outputTestCaseG.print(SaidaGerador.getTexto());
+            outputTestCaseG.close();
+        }
     }
 }

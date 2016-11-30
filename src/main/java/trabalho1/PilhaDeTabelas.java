@@ -9,21 +9,17 @@ import java.util.List;
  */
 public class PilhaDeTabelas {
 
-    private LinkedList<TabelaDeSimbolos> pilha;
+    static private LinkedList<TabelaDeSimbolos> pilha = new LinkedList<TabelaDeSimbolos>();
 
-    public PilhaDeTabelas() {
-        pilha = new LinkedList<TabelaDeSimbolos>();
-    }
-
-    public void empilhar(TabelaDeSimbolos ts) {
+    static public void empilhar(TabelaDeSimbolos ts) {
         pilha.push(ts);
     }
 
-    public TabelaDeSimbolos topo() {
+    static public TabelaDeSimbolos topo() {
         return pilha.peek();
     }
 
-    public boolean existeSimbolo(String nome) {
+    static public boolean existeSimbolo(String nome) {
         for (TabelaDeSimbolos ts : pilha) {
             if (ts.existeSimbolo(nome)) {
                 return true;
@@ -32,7 +28,7 @@ public class PilhaDeTabelas {
         return false;
     }
 
-    public EntradaTS getSimbolo(String nome) {
+    static public EntradaTS getSimbolo(String nome) {
         for (TabelaDeSimbolos ts : pilha) {
             EntradaTS entry = ts.getSimbolo(nome);
             if (entry != null) {
@@ -42,12 +38,12 @@ public class PilhaDeTabelas {
         return null;
     }
 
-    public void desempilhar() {
+    static public void desempilhar() {
         TabelaDeSimbolos ret = pilha.pop();
         // Saida.println(ret.toString());
     }
 
-    public List<TabelaDeSimbolos> getTodasTabelas() {
+    static public List<TabelaDeSimbolos> getTodasTabelas() {
         return pilha;
     }
 
