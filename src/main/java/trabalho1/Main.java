@@ -13,7 +13,7 @@ import org.antlr.v4.runtime.misc.ParseCancellationException;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        //String inputFilePath = "corretor/casosDeTesteT1/2.arquivos_com_erros_semanticos/entrada/14.algoritmo_10-1_apostila_LA.txt";
+        //String inputFilePath = "corretor/casosDeTesteT1/2.arquivos_com_erros_semanticos/entrada/10.algoritmo_7-2_apostila_LA.txt";
         //String outputFilePath = "saida";
         String inputFilePath = args[0];
         String outputFilePath = args[1];
@@ -49,19 +49,14 @@ public class Main {
         } catch (ParseCancellationException ex) {
 
         }
-        
-        
+        PrintWriter outputTestCase = new PrintWriter(outputFilePath, "UTF-8");
 
-        if(Saida.is_modified()){
+        if (Saida.is_modified()) {
             Saida.println("Fim da compilacao", true);
-            PrintWriter outputTestCase = new PrintWriter(outputFilePath, "UTF-8");
             outputTestCase.print(Saida.getTexto());
-            outputTestCase.close();        
+        } else {
+            outputTestCase.print(SaidaGerador.getTexto());
         }
-        else {        
-            PrintWriter outputTestCaseG = new PrintWriter(outputFilePath, "UTF-8");
-            outputTestCaseG.print(SaidaGerador.getTexto());
-            outputTestCaseG.close();
-        }
+        outputTestCase.close();
     }
 }
