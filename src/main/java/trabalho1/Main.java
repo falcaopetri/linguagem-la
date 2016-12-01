@@ -13,7 +13,7 @@ import org.antlr.v4.runtime.misc.ParseCancellationException;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        //String inputFilePath = "corretor/casosDeTesteT1/2.arquivos_com_erros_semanticos/entrada/14.algoritmo_10-1_apostila_LA.txt";
+        //String inputFilePath = "/home/jvcaquino/Documents/Universidade/compiladores2/linguagem-la/corretor/casosDeTesteT1/3.arquivos_sem_erros/1.entrada/1.declaracao_leitura_impressao_inteiro.alg";
         //String outputFilePath = "saida";
         String inputFilePath = args[0];
         String outputFilePath = args[1];
