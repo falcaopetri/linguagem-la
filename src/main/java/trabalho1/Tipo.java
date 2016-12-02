@@ -28,8 +28,7 @@ interface Tipo {
             } else {
                 return TipoEnum.UNDEFINED;
             }
-        }
-        else if ((first instanceof TipoEnum) && (second instanceof TipoEstendido)) {
+        } else if ((first instanceof TipoEnum) && (second instanceof TipoEstendido)) {
             if (first == TipoEnum.NONE) {
                 return second;
             } else {
@@ -47,7 +46,7 @@ interface Tipo {
         } else if ((first instanceof TipoEstendido) && (second instanceof TipoEnum)) {
             return false;
         }
-        
+
         return false;
     }
 
@@ -55,8 +54,7 @@ interface Tipo {
         try {
             return TipoEnum.checkFuncParameters((TipoEnum) first, (TipoEnum) second);
         } catch (Exception e) {
-            // TODO
-            throw new UnsupportedOperationException("Not supported yet."); //TipoEstendido.mergeTipos(first, second);
+            return TipoEstendido.checkFuncParameters((TipoEstendido) first, (TipoEstendido) second);
         }
     }
 }
@@ -68,6 +66,10 @@ class TipoEstendido implements Tipo {
 
     static boolean checkAtribuicao(TipoEstendido first, TipoEstendido second) {
         return first.tipo_estendido.equals(second.tipo_estendido);
+    }
+
+    static boolean checkFuncParameters(TipoEstendido first, TipoEstendido second) {
+        return mergeTipos(first, second) != TipoEnum.UNDEFINED;
     }
 
     String tipo_estendido;

@@ -39,7 +39,7 @@ public class TabelaDeSimbolos {
                     return nomes.length == 1;
                 } else if (etds.getTipo() instanceof TipoEstendido) {
                     TipoEstendido tipo = (TipoEstendido) etds.getTipo();
-                    EntradaTSRegistro registro = (EntradaTSRegistro) getSimbolo(tipo.tipo_estendido);
+                    EntradaTSRegistro registro = (EntradaTSRegistro) PilhaDeTabelas.getSimbolo(tipo.tipo_estendido);
 
                     if (nomes.length == 1) {
                         return true;
@@ -65,7 +65,7 @@ public class TabelaDeSimbolos {
                     }
                 } else if (etds.getTipo() instanceof TipoEstendido) {
                     TipoEstendido tipo = (TipoEstendido) etds.getTipo();
-                    EntradaTSRegistro registro = (EntradaTSRegistro) getSimbolo(tipo.tipo_estendido);
+                    EntradaTSRegistro registro = (EntradaTSRegistro) PilhaDeTabelas.getSimbolo(tipo.tipo_estendido);
 
                     if (nomes.length == 1) {
                         return etds;
