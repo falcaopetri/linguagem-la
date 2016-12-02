@@ -56,25 +56,30 @@ public class Gerador extends LABaseVisitor {
     @Override
     public Object visitCmd(LAParser.CmdContext ctx) {
         if ("leia".equals(ctx.getStart().getText())) {
-            SaidaGerador.println("scanf(\"", true);
+            SaidaGerador.print("scanf(\"", true);
             if (ctx.identificador() != null) {
                 EntradaTS tipo = PilhaDeTabelas.getSimbolo(ctx.identificador().getText());
                 if (tipo != null) {
-                    SaidaGerador.println(returnMask(tipo.getTipo()), true);
+                    SaidaGerador.print(returnMask(tipo.getTipo()), true);
                 }
-                SaidaGerador.println("\", &" + ctx.identificador().getText(), true);
+                if(tipo.getTipo() == TipoEnum.LITERAL){
+                    SaidaGerador.print("\", " + ctx.identificador().getText(), true);
+                }
+                else{
+                    SaidaGerador.print("\", &" + ctx.identificador().getText(), true);
+                }
             }
             SaidaGerador.println(");", true);
             
             
         } else if ("escreva".equals(ctx.getStart().getText())) {
-            SaidaGerador.println("print(\"", true);
+            SaidaGerador.print("printf(\"", true);
             if (ctx.expressao() != null) {
                 Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
 
                 String stringMask = returnMask(par.b);
 
-                SaidaGerador.println(stringMask + " , " + par.a, true);
+                SaidaGerador.print(stringMask + "\" , " + par.a, true);
                 //SaidaGerador.println(returnMask(ALGUMACOISA.getTipo()), true);
             }
 
@@ -165,9 +170,8 @@ public class Gerador extends LABaseVisitor {
         String string1 = "";
         Pair<String, Tipo> par = (Pair<String, Tipo>) visitTermo(ctx.termo());
         
-        if (ctx.outros_termos() != null){
-            string1 = (String) visitOutros_termos(ctx.outros_termos());
-        }
+        string1 = (String) visitOutros_termos(ctx.outros_termos());
+        
         String string2 = par.a + " " + string1;
 
         return new Pair<String, Tipo>(string2, par.b);
@@ -189,9 +193,12 @@ public class Gerador extends LABaseVisitor {
 
     @Override
     public Object visitOp_opcional(LAParser.Op_opcionalContext ctx) {
-        String string1 = ctx.op_relacional().getText();
-        Pair<String, Tipo> par = (Pair<String, Tipo>) visitExp_aritmetica(ctx.exp_aritmetica());
-
+        String string1 = "";
+        Pair<String, Tipo> par = new Pair<String, Tipo> ("", TipoEnum.NONE);
+        if(ctx.op_relacional() != null){
+            string1 = ctx.op_relacional().getText();
+            par = (Pair<String, Tipo>) visitExp_aritmetica(ctx.exp_aritmetica());
+        }
         String string2 = string1 + " " + par.a;
 
         return string2;
@@ -234,12 +241,12 @@ public class Gerador extends LABaseVisitor {
 
     @Override
     public Object visitOutros_termos(LAParser.Outros_termosContext ctx) {
-        Pair<String, Tipo> par = null;
-        String string1, string2 = "";
-
-        string1 = ctx.op_adicao().getText();
-        par = (Pair<String, Tipo>) visitTermo(ctx.termo());
+        Pair<String, Tipo> par = new Pair<String, Tipo> ("", TipoEnum.NONE);
+        String string1 = "";
+        String string2 = "";
         if(ctx.outros_termos() != null){
+            string1 = ctx.op_adicao().getText();
+            par = (Pair<String, Tipo>) visitTermo(ctx.termo());
             string2 = " " + (String) visitOutros_termos(ctx.outros_termos());
         }
         return string1 + " " + par.a + string2;
@@ -265,11 +272,13 @@ public class Gerador extends LABaseVisitor {
 
     @Override
     public Object visitOutros_fatores(LAParser.Outros_fatoresContext ctx) {
-        Pair<String, Tipo> par = null;
-        String string1, string2 = "";
-        string1 = ctx.op_multiplicacao().getText();
-        par = (Pair<String, Tipo>) visitFator(ctx.fator());
-        if(ctx.outros_fatores() != null){
+        Pair<String, Tipo> par = new Pair<String, Tipo> ("", TipoEnum.NONE);
+        String string1 = ""; 
+        String string2 = "";
+        if(ctx.outros_fatores() != null){    
+            string1 = ctx.op_multiplicacao().getText();
+            par = (Pair<String, Tipo>) visitFator(ctx.fator());
+        
             string2 = " " + (String) visitOutros_fatores(ctx.outros_fatores());
         }
         return string1 + " " + par.a + string2;
@@ -307,9 +316,9 @@ public class Gerador extends LABaseVisitor {
         Tipo tipo;
         if (ctx.IDENT() != null) {
             nome = ctx.IDENT().getText();
-            //EntradaTS tipoEntrada = PilhaDeTabelas.getSimbolo(ctx.IDENT().getText());
-            //tipo = tipoEntrada.getTipo();
-            tipo = TipoEnum.INTEIRO;
+            EntradaTS tipoEntrada = PilhaDeTabelas.getSimbolo(ctx.IDENT().getText());
+            tipo = tipoEntrada.getTipo();
+            //tipo = TipoEnum.INTEIRO;
             //TODO NÃO TRATA REGISTRO            
             return new Pair<String, Tipo>(nome, tipo);
         } else if (ctx.NUM_INT() != null) {
@@ -353,7 +362,7 @@ public class Gerador extends LABaseVisitor {
             return new Pair<String, Tipo>(nome, tipo);
         }
 
-        return super.visitParcela_nao_unario(ctx); //To change body of generated methods, choose Tools | Templates.
+        return super.visitParcela_nao_unario(ctx);
     }
 
 }

@@ -24,6 +24,15 @@ public class SaidaGerador{
             texto.append(txt).append("\n");
         }
     }
+    
+    public static void print(String txt, boolean force) {
+        if (force || !is_modified()) {
+            // Força uma única linha de erro
+            // O parser continua detectando os próximos erros,
+            // mas apenas o primeiro output de erro é processado
+            texto.append(txt).append("");
+        }
+    }
 
     public static boolean is_modified() {
         return texto.length() != 0;
