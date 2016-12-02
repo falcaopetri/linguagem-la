@@ -9,5 +9,6 @@ scanf("
 ", &x
 );
 print("
+Outro tipo , false
 );
 }

@@ -65,11 +65,19 @@ public class Gerador extends LABaseVisitor {
                 SaidaGerador.println("\", &" + ctx.identificador().getText(), true);
             }
             SaidaGerador.println(");", true);
+            
+            
         } else if ("escreva".equals(ctx.getStart().getText())) {
             SaidaGerador.println("print(\"", true);
             if (ctx.expressao() != null) {
+                Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
+
+                String stringMask = returnMask(par.b);
+
+                SaidaGerador.println(stringMask + " , " + par.a, true);
                 //SaidaGerador.println(returnMask(ALGUMACOISA.getTipo()), true);
             }
+
             if (ctx.mais_expressao() != null) {
                 LAParser.Mais_expressaoContext maisexp = ctx.mais_expressao();
                 while (maisexp != null) {
@@ -77,9 +85,60 @@ public class Gerador extends LABaseVisitor {
                     maisexp = maisexp.mais_expressao();
                 }
             }
-
             SaidaGerador.println(");", true);
         }
+        else if("se".equals(ctx.getStart().getText())){
+            SaidaGerador.println("if (", true);
+            //visitarExpressão
+            SaidaGerador.println("){", true);
+            //visitar comandos
+            if (ctx.senao_opcional() != null){
+                SaidaGerador.println("} else( ");
+                //visitarSenaoOp
+            }
+            SaidaGerador.println("}");
+            
+        }
+        else if("caso".equals(ctx.getStart().getText())){
+            SaidaGerador.println("switch(", true);
+            //visitexpressão
+            SaidaGerador.println(")", true);
+            
+            
+        }
+        else if(ctx.IDENT()!= null){
+            SaidaGerador.println(ctx.IDENT().getText() + " = ", true);
+            //visitChamadaAtribuicao
+        }
+        
+        else if("caso".equals(ctx.getStart().getText())){
+            SaidaGerador.println("switch(", true);
+            //visitexpressão
+            SaidaGerador.println(")", true);
+            //visitselecao
+            //visitopcional
+            
+            
+        }
+        else if("faca".equals(ctx.getStart().getText())){
+            SaidaGerador.println("for(", true);
+            //visitexpressão
+            SaidaGerador.println(") {", true);
+            //visitComandos
+            SaidaGerador.println("}", true);
+            
+            
+        }
+        
+        else if("enquanto".equals(ctx.getStart().getText())){
+            SaidaGerador.println("while(", true);
+            //visitexpressão
+            SaidaGerador.println("){ ", true);
+            //visitComandos
+            SaidaGerador.println("}", true);
+        }
+        
+        
         return null;
     }
 
@@ -97,49 +156,51 @@ public class Gerador extends LABaseVisitor {
 
     @Override
     public Object visitExpressao(LAParser.ExpressaoContext ctx) {
-        Tipo tipo1 = (Tipo) visitTermo_logico(ctx.termo_logico());
-        Tipo tipo2 = (Tipo) visitOutros_termos_logicos(ctx.outros_termos_logicos());
-
-        return Tipo.mergeTipos(tipo1, tipo2);
+        //TODO NÃO IMPLEMENTE OUTROS_TERMOS_LOGICOS
+        return (Pair<String, Tipo>) visitTermo_logico(ctx.termo_logico());
     }
 
     @Override
     public Object visitExp_aritmetica(LAParser.Exp_aritmeticaContext ctx) {
-        Tipo tipo1 = (Tipo) visitTermo(ctx.termo());
-        Tipo tipo2 = (Tipo) visitOutros_termos(ctx.outros_termos());
+        String string1 = "";
+        Pair<String, Tipo> par = (Pair<String, Tipo>) visitTermo(ctx.termo());
+        
+        if (ctx.outros_termos() != null){
+            string1 = (String) visitOutros_termos(ctx.outros_termos());
+        }
+        String string2 = par.a + " " + string1;
 
-        return Tipo.mergeTipos(tipo1, tipo2);
+        return new Pair<String, Tipo>(string2, par.b);
     }
 
     @Override
     public Object visitExp_relacional(LAParser.Exp_relacionalContext ctx) {
-        Tipo tipo1 = (Tipo) visitExp_aritmetica(ctx.exp_aritmetica());
-        Tipo tipo2 = (Tipo) visitOp_opcional(ctx.op_opcional());
+        String string1 = " ";
+        Pair<String, Tipo> par = (Pair<String, Tipo>) visitExp_aritmetica(ctx.exp_aritmetica());
 
-        if (tipo2 == TipoEnum.NONE) {
-            return tipo1;
-        } else if (Tipo.mergeTipos(tipo1, tipo2) == TipoEnum.UNDEFINED) { // verifica, para A op B, type(A) dá merge com type(B)
-            return TipoEnum.UNDEFINED;
-        } else {
-            return TipoEnum.LOGICO;
+        if (ctx.op_opcional() != null) {
+            string1 = (String) visitOp_opcional(ctx.op_opcional());
         }
+
+        String string2 = par.a + " " + string1;
+
+        return new Pair<String, Tipo>(string2, par.b);
     }
 
     @Override
     public Object visitOp_opcional(LAParser.Op_opcionalContext ctx) {
-        if (ctx.op_relacional() != null) {
-            return visitExp_aritmetica(ctx.exp_aritmetica());
-        } else {
-            return TipoEnum.NONE;
-        }
+        String string1 = ctx.op_relacional().getText();
+        Pair<String, Tipo> par = (Pair<String, Tipo>) visitExp_aritmetica(ctx.exp_aritmetica());
+
+        String string2 = string1 + " " + par.a;
+
+        return string2;
     }
 
     @Override
     public Object visitTermo_logico(LAParser.Termo_logicoContext ctx) {
-        Tipo tipo1 = (Tipo) visitFator_logico(ctx.fator_logico());
-        Tipo tipo2 = (Tipo) visitOutros_fatores_logicos(ctx.outros_fatores_logicos());
-
-        return Tipo.mergeTipos(tipo1, tipo2);
+        //TODO NÃO IMPLEMENTA OUTROS_FATORES_LOGICOS
+        return (Pair<String, Tipo>) visitFator_logico(ctx.fator_logico());
     }
 
     @Override
@@ -152,40 +213,77 @@ public class Gerador extends LABaseVisitor {
     }
 
     @Override
-    public Object visitFator_logico(LAParser.Fator_logicoContext ctx) {
-        Tipo tipo1 = (Tipo) visitOp_nao(ctx.op_nao());
-        Tipo tipo2 = (Tipo) visitParcela_logica(ctx.parcela_logica());
+    public Object visitFator_logico(LAParser.Fator_logicoContext ctx) { 
+        Pair<String, Tipo> par;
+        //TODO NÃO IMPLEMENTA OP_NÃO
+        if (ctx.parcela_logica().exp_relacional() != null) {
+            par = (Pair<String, Tipo>) visitParcela_logica(ctx.parcela_logica());
+        } else {
+            String string = ctx.parcela_logica().getText();
+            if (string.equals("verdadeiro")){
+                string = "true";
+            } else {
+                string = "false";
+            }
+            Tipo tipo = TipoEnum.LOGICO;
 
-        return Tipo.mergeTipos(tipo1, tipo2);
+            par = new Pair<String, Tipo>(string, tipo);
+        }
+        return par;
     }
 
     @Override
     public Object visitOutros_termos(LAParser.Outros_termosContext ctx) {
-        if (ctx.termo() == null) { // não possui termo
-            return TipoEnum.NONE;
-        } else {
-            Tipo tipo1 = (Tipo) visitTermo(ctx.termo());
-            Tipo tipo2 = (Tipo) visitOutros_termos(ctx.outros_termos());
+        Pair<String, Tipo> par = null;
+        String string1, string2 = "";
 
-            return Tipo.mergeTipos(tipo1, tipo2);
+        string1 = ctx.op_adicao().getText();
+        par = (Pair<String, Tipo>) visitTermo(ctx.termo());
+        if(ctx.outros_termos() != null){
+            string2 = " " + (String) visitOutros_termos(ctx.outros_termos());
         }
+        return string1 + " " + par.a + string2;
     }
 
     @Override
-    public Object visitFator(LAParser.FatorContext ctx) {        
-        Pair<String, Tipo> par1 = (Pair<String, Tipo>) visitParcela(ctx.parcela()); 
-        //TODO NÃO TRATA OUTRAS_PARCELAS
-
-        return Tipo.mergeTipos(tipo1, tipo2);
+    public Object visitFator(LAParser.FatorContext ctx) {
+        //TODO NÃO IMPLEMENTA OUTRAS_PARCELAS    
+        return (Pair<String, Tipo>) visitParcela(ctx.parcela());
     }
 
     @Override
     public Object visitTermo(LAParser.TermoContext ctx) {
-        Tipo tipo1 = (Tipo) visitFator(ctx.fator());
-        Tipo tipo2 = (Tipo) visitOutros_fatores(ctx.outros_fatores());
+        String string = "";
+        Pair<String, Tipo> par = (Pair<String, Tipo>) visitFator(ctx.fator());
+        if(ctx.outros_fatores() != null){
+            string = " " + (String) visitOutros_fatores(ctx.outros_fatores());
+        }
+        String stringPar = par.a + string;
 
-        return Tipo.mergeTipos(tipo1, tipo2);
+        return new Pair<String, Tipo>(stringPar, par.b);
     }
+
+    @Override
+    public Object visitOutros_fatores(LAParser.Outros_fatoresContext ctx) {
+        Pair<String, Tipo> par = null;
+        String string1, string2 = "";
+        string1 = ctx.op_multiplicacao().getText();
+        par = (Pair<String, Tipo>) visitFator(ctx.fator());
+        if(ctx.outros_fatores() != null){
+            string2 = " " + (String) visitOutros_fatores(ctx.outros_fatores());
+        }
+        return string1 + " " + par.a + string2;
+    }
+/*
+    @Override
+    public Object visitOp_multiplicacao(LAParser.Op_multiplicacaoContext ctx) {
+        if ("*".equals(ctx.getStart().getText())) {
+            return "*";
+        } else {
+            return "/";
+        }
+    }
+*/
 
     @Override
     public Object visitOutros_termos_logicos(LAParser.Outros_termos_logicosContext ctx) {
@@ -209,9 +307,9 @@ public class Gerador extends LABaseVisitor {
         Tipo tipo;
         if (ctx.IDENT() != null) {
             nome = ctx.IDENT().getText();
-            EntradaTS tipoEntrada = PilhaDeTabelas.getSimbolo(ctx.IDENT().getText());
-            tipo = tipoEntrada.getTipo();
-
+            //EntradaTS tipoEntrada = PilhaDeTabelas.getSimbolo(ctx.IDENT().getText());
+            //tipo = tipoEntrada.getTipo();
+            tipo = TipoEnum.INTEIRO;
             //TODO NÃO TRATA REGISTRO            
             return new Pair<String, Tipo>(nome, tipo);
         } else if (ctx.NUM_INT() != null) {
@@ -231,17 +329,16 @@ public class Gerador extends LABaseVisitor {
 
     @Override
     public Object visitParcela_logica(LAParser.Parcela_logicaContext ctx) {
-        return super.visitParcela_logica(ctx); //To change body of generated methods, choose Tools | Templates.
+        return (Pair<String, Tipo>) visitExp_relacional(ctx.exp_relacional());
     }
 
     @Override
     public Object visitParcela(LAParser.ParcelaContext ctx) {
-        if (ctx.parcela_unario() != null){
+        if (ctx.parcela_unario() != null) {
             return (Pair<String, Tipo>) visitParcela_unario(ctx.parcela_unario());
+        } else if (ctx.parcela_nao_unario() != null) {
+            return (Pair<String, Tipo>) visitParcela_nao_unario(ctx.parcela_nao_unario());
         }
-        else if(ctx.parcela_nao_unario() != null){
-            return (Pair<String, Tipo>) visitParcela_nao_unario(ctx.parcela_nao_unario());            
-        }                       
         return null;
     }
 
@@ -249,16 +346,14 @@ public class Gerador extends LABaseVisitor {
     public Object visitParcela_nao_unario(LAParser.Parcela_nao_unarioContext ctx) {
         String nome;
         Tipo tipo;
-        if (ctx.CADEIA() != null){
+        if (ctx.CADEIA() != null) {
             nome = ctx.CADEIA().getText();
             tipo = TipoEnum.LITERAL;
-          
+
             return new Pair<String, Tipo>(nome, tipo);
         }
-            
-        
+
         return super.visitParcela_nao_unario(ctx); //To change body of generated methods, choose Tools | Templates.
     }
-    
-    
+
 }
