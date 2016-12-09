@@ -29,13 +29,56 @@ public class Gerador extends LABaseVisitor {
 
     @Override
     public Object visitVariavel(LAParser.VariavelContext ctx) {
-        visitTipo(ctx.tipo());
+        String tipo = (String) visitTipo(ctx.tipo());
         SaidaGerador.println(" " + ctx.IDENT().getText(), true);
-        visitDimensao(ctx.dimensao());
+        if(tipo.equals("literal")){
+            SaidaGerador.println("[80]", true);
+        }
+        else{
+            visitDimensao(ctx.dimensao());
+        }
         visitMais_var(ctx.mais_var());
         SaidaGerador.println(";", true);
         return null; //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public Object visitMais_var(LAParser.Mais_varContext ctx) {
+        if(ctx.IDENT() != null){
+            SaidaGerador.println(", " + ctx.IDENT().getText(), true);
+        }
+               
+        return super.visitMais_var(ctx); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
+
+    @Override
+    public Object visitTipo(LAParser.TipoContext ctx) {
+        if (ctx.registro() != null){
+            return null;
+        }
+        else if(ctx.tipo_estendido()!= null){
+            visitTipo_estendido(ctx.tipo_estendido());
+            return ctx.tipo_estendido().tipo_basico_ident().tipo_basico().getText();
+        }
+        return null;
+    }
+    
+    
+
+    @Override
+    public Object visitDimensao(LAParser.DimensaoContext ctx) {
+        if(ctx.exp_aritmetica() != null){
+            SaidaGerador.println("[", true);
+            Pair<String, Tipo> par = (Pair<String, Tipo>) visitExp_aritmetica(ctx.exp_aritmetica());
+            SaidaGerador.println(par.a, true);
+            SaidaGerador.println("]", true);
+        }
+        return null;
+    }
+ 
+    
 
     @Override
     public Object visitTipo_basico(LAParser.Tipo_basicoContext ctx) {
@@ -43,7 +86,7 @@ public class Gerador extends LABaseVisitor {
         if (tipo == TipoEnum.INTEIRO) {
             SaidaGerador.println("int", true);
         } else if (tipo == TipoEnum.LITERAL) {
-            SaidaGerador.println("char[80]", true);
+            SaidaGerador.println("char", true);
         } else if (tipo == TipoEnum.REAL) {
             SaidaGerador.println("float", true);
         } else if (tipo == TipoEnum.LOGICO) {
@@ -61,7 +104,6 @@ public class Gerador extends LABaseVisitor {
                 EntradaTS tipo = PilhaDeTabelas.getSimbolo(ctx.identificador().getText());
                 if (tipo != null) {
                     SaidaGerador.print(returnMask(tipo.getTipo()), true);
-
                     if (tipo.getTipo() == TipoEnum.LITERAL) {
                         SaidaGerador.print("\", " + ctx.identificador().getText(), true);
                     } else {
@@ -82,34 +124,23 @@ public class Gerador extends LABaseVisitor {
                 SaidaGerador.print(stringMask + "\" , " + par.a, true);
                 //SaidaGerador.println(returnMask(ALGUMACOISA.getTipo()), true);
             }
-
-            if (ctx.mais_expressao() != null) {
-                LAParser.Mais_expressaoContext maisexp = ctx.mais_expressao();
-                while (maisexp != null) {
-                    //SaidaGerador.println(" " + returnMask(ALGUMACOISA.getTipo()), true);
-                    maisexp = maisexp.mais_expressao();
-                }
-            }
             SaidaGerador.println(");", true);
+            if(ctx.mais_expressao() != null){
+                visitMais_expressao(ctx.mais_expressao());
+            }
+            
+            
         } else if ("se".equals(ctx.getStart().getText())) {
             SaidaGerador.println("if (", true);
-            //visitarExpressão
-            SaidaGerador.println("){", true);
-            //visitar comandos
-            if (ctx.senao_opcional() != null) {
-                SaidaGerador.println("} else( ");
-                //visitarSenaoOp
-            }
-            SaidaGerador.println("}");
-
-        } else if ("caso".equals(ctx.getStart().getText())) {
-            SaidaGerador.println("switch(", true);
-            //visitexpressão
-            SaidaGerador.println(")", true);
+            Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
+            SaidaGerador.println(par.a + "){", true);
+            visitComandos(ctx.comandos());
+            visitSenao_opcional(ctx.senao_opcional());
+            SaidaGerador.println("}", true);
 
         } else if (ctx.IDENT() != null) {
             SaidaGerador.println(ctx.IDENT().getText() + " = ", true);
-            //visitChamadaAtribuicao
+            visitChamada_atribuicao(ctx.chamada_atribuicao());
         } else if ("caso".equals(ctx.getStart().getText())) {
             SaidaGerador.println("switch(", true);
             //visitexpressão
@@ -118,22 +149,64 @@ public class Gerador extends LABaseVisitor {
             //visitopcional
 
         } else if ("faca".equals(ctx.getStart().getText())) {
-            SaidaGerador.println("for(", true);
-            //visitexpressão
-            SaidaGerador.println(") {", true);
-            //visitComandos
-            SaidaGerador.println("}", true);
+            SaidaGerador.println("do {", true);
+            visitComandos(ctx.comandos());
+            SaidaGerador.println("} while(!(", true);
+            Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
+            SaidaGerador.println(par.a + "));", true);
 
         } else if ("enquanto".equals(ctx.getStart().getText())) {
             SaidaGerador.println("while(", true);
-            //visitexpressão
-            SaidaGerador.println("){ ", true);
-            //visitComandos
-            SaidaGerador.println("}", true);
+            Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
+            SaidaGerador.println(par.a + "){", true);
+            visitComandos(ctx.comandos());
         }
 
         return null;
     }
+
+    @Override
+    public Object visitMais_expressao(LAParser.Mais_expressaoContext ctx) {
+        
+        if (ctx.expressao() != null) {
+            SaidaGerador.print("printf(\"", true);
+            Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
+
+            String stringMask = returnMask(par.b);
+
+            SaidaGerador.print(stringMask + "\" , " + par.a, true);
+            //SaidaGerador.println(returnMask(ALGUMACOISA.getTipo()), true);
+            SaidaGerador.println(");", true);
+        }
+        
+        if(ctx.mais_expressao() != null){
+            visitMais_expressao(ctx.mais_expressao());
+        }
+        return null; //To change body of generated methods, choose Tools | Templates.
+    }
+
+    
+    
+    @Override
+    public Object visitSenao_opcional(LAParser.Senao_opcionalContext ctx) {
+        if(ctx.getStart().getText().equals("senao")){
+            SaidaGerador.println("}else{", true);
+        }
+        return super.visitSenao_opcional(ctx); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    
+    
+    @Override
+    public Object visitChamada_atribuicao(LAParser.Chamada_atribuicaoContext ctx) {
+        if(ctx.expressao() != null){
+            Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
+            SaidaGerador.println(par.a + ";", true);
+        }
+        return super.visitChamada_atribuicao(ctx); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
 
     public String returnMask(Tipo symbol) {
         if (symbol == TipoEnum.INTEIRO) {
@@ -185,6 +258,11 @@ public class Gerador extends LABaseVisitor {
         Pair<String, Tipo> par = new Pair<String, Tipo>("", TipoEnum.NONE);
         if (ctx.op_relacional() != null) {
             string1 = ctx.op_relacional().getText();
+           
+            if(string1.equals("=")){
+                string1 = "==";
+            }
+                    
             par = (Pair<String, Tipo>) visitExp_aritmetica(ctx.exp_aritmetica());
         }
         String string2 = string1 + " " + par.a;
@@ -321,6 +399,8 @@ public class Gerador extends LABaseVisitor {
 
             return new Pair<String, Tipo>(nome, tipo);
 
+        } else if (ctx.expressao() != null){
+            return (Pair<String, Tipo>) visitExpressao(ctx.expressao());
         }
         return super.visitParcela_unario(ctx); //To change body of generated methods, choose Tools | Templates.
     }
