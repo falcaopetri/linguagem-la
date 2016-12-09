@@ -23,11 +23,6 @@ public class Gerador extends LABaseVisitor {
     }
 
     @Override
-    public Object visitDeclaracoes(LAParser.DeclaracoesContext ctx) {
-        return super.visitDeclaracoes(ctx); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     public Object visitVariavel(LAParser.VariavelContext ctx) {
         String tipo = (String) visitTipo(ctx.tipo());
         SaidaGerador.println(" " + ctx.IDENT().getText(), true);
@@ -39,7 +34,7 @@ public class Gerador extends LABaseVisitor {
         }
         visitMais_var(ctx.mais_var());
         SaidaGerador.println(";", true);
-        return null; //To change body of generated methods, choose Tools | Templates.
+        return null;
     }
 
     @Override
@@ -48,7 +43,7 @@ public class Gerador extends LABaseVisitor {
             SaidaGerador.println(", " + ctx.IDENT().getText(), true);
         }
                
-        return super.visitMais_var(ctx); //To change body of generated methods, choose Tools | Templates.
+        return super.visitMais_var(ctx);
     }
     
     
@@ -182,7 +177,7 @@ public class Gerador extends LABaseVisitor {
         if(ctx.mais_expressao() != null){
             visitMais_expressao(ctx.mais_expressao());
         }
-        return null; //To change body of generated methods, choose Tools | Templates.
+        return null;
     }
 
     
@@ -192,7 +187,7 @@ public class Gerador extends LABaseVisitor {
         if(ctx.getStart().getText().equals("senao")){
             SaidaGerador.println("}else{", true);
         }
-        return super.visitSenao_opcional(ctx); //To change body of generated methods, choose Tools | Templates.
+        return super.visitSenao_opcional(ctx);
     }
 
     
@@ -203,7 +198,7 @@ public class Gerador extends LABaseVisitor {
             Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
             SaidaGerador.println(par.a + ";", true);
         }
-        return super.visitChamada_atribuicao(ctx); //To change body of generated methods, choose Tools | Templates.
+        return super.visitChamada_atribuicao(ctx);
     }
     
     
@@ -402,7 +397,7 @@ public class Gerador extends LABaseVisitor {
         } else if (ctx.expressao() != null){
             return (Pair<String, Tipo>) visitExpressao(ctx.expressao());
         }
-        return super.visitParcela_unario(ctx); //To change body of generated methods, choose Tools | Templates.
+        return super.visitParcela_unario(ctx);
     }
 
     @Override
