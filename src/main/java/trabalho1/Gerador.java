@@ -155,6 +155,7 @@ public class Gerador extends LABaseVisitor {
             Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
             SaidaGerador.println(par.a + "){", true);
             visitComandos(ctx.comandos());
+            SaidaGerador.println("}", true);
         }
 
         return null;
