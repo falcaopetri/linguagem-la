@@ -107,7 +107,7 @@
                                 <argument>${basedir}/corretor/casosDeTesteT1</argument>
                                 <argument>""</argument>
                                 <!-- Opções: sintatico, semantico, gerador, tudo-->
-                                <argument>gerador</argument>
+                                <argument>tudo</argument>
                             </arguments>
                         </configuration>                        
                     </execution>

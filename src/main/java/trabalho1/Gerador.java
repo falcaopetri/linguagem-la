@@ -26,10 +26,9 @@ public class Gerador extends LABaseVisitor {
     public Object visitVariavel(LAParser.VariavelContext ctx) {
         String tipo = (String) visitTipo(ctx.tipo());
         SaidaGerador.println(" " + ctx.IDENT().getText(), true);
-        if(tipo.equals("literal")){
+        if (tipo.equals("literal")) {
             SaidaGerador.println("[80]", true);
-        }
-        else{
+        } else {
             visitDimensao(ctx.dimensao());
         }
         visitMais_var(ctx.mais_var());
@@ -39,32 +38,35 @@ public class Gerador extends LABaseVisitor {
 
     @Override
     public Object visitMais_var(LAParser.Mais_varContext ctx) {
-        if(ctx.IDENT() != null){
+        if (ctx.IDENT() != null) {
             SaidaGerador.println(", " + ctx.IDENT().getText(), true);
         }
-               
+
         return super.visitMais_var(ctx);
     }
-    
-    
 
     @Override
     public Object visitTipo(LAParser.TipoContext ctx) {
-        if (ctx.registro() != null){
+        if (ctx.registro() != null) {
             return null;
-        }
-        else if(ctx.tipo_estendido()!= null){
+        } else if (ctx.tipo_estendido() != null) {
             visitTipo_estendido(ctx.tipo_estendido());
-            return ctx.tipo_estendido().tipo_basico_ident().tipo_basico().getText();
+            String result = "";
+
+            if (ctx.tipo_estendido().ponteiros_opcionais().ponteiros_opcionais() != null) {
+                result += "^";
+            }
+
+            result += ctx.tipo_estendido().tipo_basico_ident().tipo_basico().getText();
+            return result;
         }
+
         return null;
     }
-    
-    
 
     @Override
     public Object visitDimensao(LAParser.DimensaoContext ctx) {
-        if(ctx.exp_aritmetica() != null){
+        if (ctx.exp_aritmetica() != null) {
             SaidaGerador.println("[", true);
             Pair<String, Tipo> par = (Pair<String, Tipo>) visitExp_aritmetica(ctx.exp_aritmetica());
             SaidaGerador.println(par.a, true);
@@ -72,8 +74,6 @@ public class Gerador extends LABaseVisitor {
         }
         return null;
     }
- 
-    
 
     @Override
     public Object visitTipo_basico(LAParser.Tipo_basicoContext ctx) {
@@ -120,11 +120,10 @@ public class Gerador extends LABaseVisitor {
                 //SaidaGerador.println(returnMask(ALGUMACOISA.getTipo()), true);
             }
             SaidaGerador.println(");", true);
-            if(ctx.mais_expressao() != null){
+            if (ctx.mais_expressao() != null) {
                 visitMais_expressao(ctx.mais_expressao());
             }
-            
-            
+
         } else if ("se".equals(ctx.getStart().getText())) {
             SaidaGerador.println("if (", true);
             Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
@@ -132,9 +131,31 @@ public class Gerador extends LABaseVisitor {
             visitComandos(ctx.comandos());
             visitSenao_opcional(ctx.senao_opcional());
             SaidaGerador.println("}", true);
-
-        } else if (ctx.IDENT() != null) {
-            SaidaGerador.println(ctx.IDENT().getText() + " = ", true);
+        } else if ("para".equals(ctx.getStart().getText())) {
+            // 'para' IDENT '<-' exp_aritmetica 'ate' exp_aritmetica 'faca' comandos 'fim_para' |
+            SaidaGerador.print("for (", true);
+            SaidaGerador.print(ctx.IDENT().getText(), true);
+            SaidaGerador.print("=", true);
+            Pair<String, Tipo> para_atr = (Pair<String, Tipo>) visitExp_aritmetica(ctx.para_atr);
+            SaidaGerador.print(para_atr.a, true);
+            Pair<String, Tipo> para_check = (Pair<String, Tipo>) visitExp_aritmetica(ctx.para_check);
+            SaidaGerador.print(";", true);
+            SaidaGerador.print(ctx.IDENT().getText(), true);
+            SaidaGerador.print("<=", true);
+            SaidaGerador.print(para_check.a, true);
+            SaidaGerador.print(";", true);
+            SaidaGerador.print(ctx.IDENT().getText(), true);
+            SaidaGerador.println("++){", true);
+            visitComandos(ctx.comandos());
+            SaidaGerador.println("}", true);
+        } else if (ctx.atr_ponteiro != null) {
+            // '^' atr_ponteiro=IDENT outros_ident dimensao '<-' expressao |
+            SaidaGerador.println("^" + ctx.atr_ponteiro.getText() + " = ", true);
+            Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
+            SaidaGerador.println(par.a, true);
+            SaidaGerador.println(";", true);
+        } else if (ctx.atr_normal != null) {
+            SaidaGerador.println(ctx.atr_normal.getText() + " = ", true);
             visitChamada_atribuicao(ctx.chamada_atribuicao());
         } else if ("caso".equals(ctx.getStart().getText())) {
             SaidaGerador.println("switch(", true);
@@ -163,7 +184,7 @@ public class Gerador extends LABaseVisitor {
 
     @Override
     public Object visitMais_expressao(LAParser.Mais_expressaoContext ctx) {
-        
+
         if (ctx.expressao() != null) {
             SaidaGerador.print("printf(\"", true);
             Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
@@ -174,35 +195,29 @@ public class Gerador extends LABaseVisitor {
             //SaidaGerador.println(returnMask(ALGUMACOISA.getTipo()), true);
             SaidaGerador.println(");", true);
         }
-        
-        if(ctx.mais_expressao() != null){
+
+        if (ctx.mais_expressao() != null) {
             visitMais_expressao(ctx.mais_expressao());
         }
         return null;
     }
 
-    
-    
     @Override
     public Object visitSenao_opcional(LAParser.Senao_opcionalContext ctx) {
-        if(ctx.getStart().getText().equals("senao")){
+        if (ctx.getStart().getText().equals("senao")) {
             SaidaGerador.println("}else{", true);
         }
         return super.visitSenao_opcional(ctx);
     }
 
-    
-    
     @Override
     public Object visitChamada_atribuicao(LAParser.Chamada_atribuicaoContext ctx) {
-        if(ctx.expressao() != null){
+        if (ctx.expressao() != null) {
             Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
             SaidaGerador.println(par.a + ";", true);
         }
         return super.visitChamada_atribuicao(ctx);
     }
-    
-    
 
     public String returnMask(Tipo symbol) {
         if (symbol == TipoEnum.INTEIRO) {
@@ -219,7 +234,13 @@ public class Gerador extends LABaseVisitor {
     @Override
     public Object visitExpressao(LAParser.ExpressaoContext ctx) {
         //TODO NÃO IMPLEMENTE OUTROS_TERMOS_LOGICOS
-        return (Pair<String, Tipo>) visitTermo_logico(ctx.termo_logico());
+        Pair<String, Tipo> par = (Pair<String, Tipo>) visitTermo_logico(ctx.termo_logico());
+
+        if (par == null) {
+            throw new AssertionError();
+        }
+
+        return par;
     }
 
     @Override
@@ -254,11 +275,11 @@ public class Gerador extends LABaseVisitor {
         Pair<String, Tipo> par = new Pair<String, Tipo>("", TipoEnum.NONE);
         if (ctx.op_relacional() != null) {
             string1 = ctx.op_relacional().getText();
-           
-            if(string1.equals("=")){
+
+            if (string1.equals("=")) {
                 string1 = "==";
             }
-                    
+
             par = (Pair<String, Tipo>) visitExp_aritmetica(ctx.exp_aritmetica());
         }
         String string2 = string1 + " " + par.a;
@@ -269,7 +290,11 @@ public class Gerador extends LABaseVisitor {
     @Override
     public Object visitTermo_logico(LAParser.Termo_logicoContext ctx) {
         //TODO NÃO IMPLEMENTA OUTROS_FATORES_LOGICOS
-        return (Pair<String, Tipo>) visitFator_logico(ctx.fator_logico());
+        Pair<String, Tipo> par = (Pair<String, Tipo>) visitFator_logico(ctx.fator_logico());
+
+        assert par != null;
+
+        return par;
     }
 
     @Override
@@ -324,6 +349,11 @@ public class Gerador extends LABaseVisitor {
     public Object visitTermo(LAParser.TermoContext ctx) {
         String string = "";
         Pair<String, Tipo> par = (Pair<String, Tipo>) visitFator(ctx.fator());
+
+        if (par == null) {
+            throw new AssertionError();
+        }
+
         if (ctx.outros_fatores() != null) {
             string = " " + (String) visitOutros_fatores(ctx.outros_fatores());
         }
@@ -356,7 +386,6 @@ public class Gerador extends LABaseVisitor {
         }
     }
      */
-
     @Override
     public Object visitOutros_termos_logicos(LAParser.Outros_termos_logicosContext ctx) {
         if (ctx.termo_logico() == null) { // não possui termo lógico
@@ -375,30 +404,32 @@ public class Gerador extends LABaseVisitor {
     //TODO
     @Override
     public Object visitParcela_unario(LAParser.Parcela_unarioContext ctx) {
-        String nome;
-        Tipo tipo;
+        String nome = null;
+        Tipo tipo = null;
+        Pair<String, Tipo> result = null;
+
         if (ctx.IDENT() != null) {
             nome = ctx.IDENT().getText();
             EntradaTS tipoEntrada = PilhaDeTabelas.getSimbolo(ctx.IDENT().getText());
             tipo = tipoEntrada.getTipo();
-            //tipo = TipoEnum.INTEIRO;
-            //TODO NÃO TRATA REGISTRO            
-            return new Pair<String, Tipo>(nome, tipo);
+            //TODO NÃO TRATA REGISTRO
+            result = new Pair<String, Tipo>(nome, tipo);
         } else if (ctx.NUM_INT() != null) {
             nome = ctx.NUM_INT().getText();
             tipo = TipoEnum.INTEIRO;
-
-            return new Pair<String, Tipo>(nome, tipo);
+            result = new Pair<String, Tipo>(nome, tipo);
         } else if (ctx.NUM_REAL() != null) {
             nome = ctx.NUM_REAL().getText();
             tipo = TipoEnum.REAL;
-
-            return new Pair<String, Tipo>(nome, tipo);
-
-        } else if (ctx.expressao() != null){
-            return (Pair<String, Tipo>) visitExpressao(ctx.expressao());
+            result = new Pair<String, Tipo>(nome, tipo);
+        } else if (ctx.expressao() != null) {
+            result = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
         }
-        return super.visitParcela_unario(ctx);
+        if (result == null) {
+            throw new AssertionError();
+        }
+
+        return result;
     }
 
     @Override
@@ -408,12 +439,22 @@ public class Gerador extends LABaseVisitor {
 
     @Override
     public Object visitParcela(LAParser.ParcelaContext ctx) {
-        if (ctx.parcela_unario() != null) {
-            return (Pair<String, Tipo>) visitParcela_unario(ctx.parcela_unario());
-        } else if (ctx.parcela_nao_unario() != null) {
-            return (Pair<String, Tipo>) visitParcela_nao_unario(ctx.parcela_nao_unario());
+        if (ctx == null) {
+            throw new AssertionError();
         }
-        return null;
+
+        Pair<String, Tipo> result = null;
+        if (ctx.parcela_unario() != null) {
+            result = (Pair<String, Tipo>) visitParcela_unario(ctx.parcela_unario());
+        } else if (ctx.parcela_nao_unario() != null) {
+            result = (Pair<String, Tipo>) visitParcela_nao_unario(ctx.parcela_nao_unario());
+        }
+
+        if (result == null) {
+            throw new AssertionError();
+        }
+
+        return result;
     }
 
     @Override
@@ -423,11 +464,13 @@ public class Gerador extends LABaseVisitor {
         if (ctx.CADEIA() != null) {
             nome = ctx.CADEIA().getText();
             tipo = TipoEnum.LITERAL;
-
-            return new Pair<String, Tipo>(nome, tipo);
+        } else {
+            //'&' IDENT outros_ident dimensao             
+            nome = "&" + ctx.IDENT().getText();
+            tipo = PilhaDeTabelas.getSimbolo(ctx.IDENT().getText()).getTipo();
         }
 
-        return super.visitParcela_nao_unario(ctx);
+        return new Pair<String, Tipo>(nome, tipo);
     }
 
 }

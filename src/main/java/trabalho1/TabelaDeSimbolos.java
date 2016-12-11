@@ -5,6 +5,10 @@ import java.util.List;
 
 public class TabelaDeSimbolos {
 
+    /*
+        Tabela de Símbolos reaproveitada de Construção de Compiladores 1.
+        Modificada conforme o necessário.
+     */
     private String escopo;
     private List<EntradaTS> simbolos;
 
