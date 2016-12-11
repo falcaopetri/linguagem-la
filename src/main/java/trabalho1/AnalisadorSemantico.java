@@ -21,7 +21,6 @@ public class AnalisadorSemantico extends LABaseVisitor {
             Isto é, é necessário uma forma de verificar se um tipo utilizado ao
             longo do programa foi declarado anteriormente.
          */
-        // TODO "tipo" deveria ser um ENUM
         global.adicionarSimbolos(Arrays.asList("literal", "inteiro", "real", "logico"), TipoEnum.TIPO);
 
         PilhaDeTabelas.empilhar(global);
@@ -29,7 +28,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
 
     @Override
     public Object visitCorpo(LAParser.CorpoContext ctx) {
-        // assert que não existe return
+        // assert que não existe return dentro do corpo do programa
         assert_does_not_return(ctx.comandos());
 
         return super.visitCorpo(ctx);
@@ -101,7 +100,6 @@ public class AnalisadorSemantico extends LABaseVisitor {
 
             EntradaTSRegistro registro = new EntradaTSRegistro(registro_ts.getNome(), registro_ts);
             PilhaDeTabelas.topo().adicionarEntrada(registro);
-            TipoEstendido.addTipo(registro.getNome());
 
             tipo = registro.getNome();
             is_pointer = false;
@@ -127,7 +125,6 @@ public class AnalisadorSemantico extends LABaseVisitor {
         }
 
         return null;
-        //return super.visitVariavel(ctx);
     }
 
     @Override
@@ -140,7 +137,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
             assert_does_not_return(ctx.comandos());
         } else {
             // TODO tipo_extendido não sendo tratado: não funciona com ponteiros
-            ep = new EntradaTSParam(ctx.IDENT().getText(), Tipo.valueOf(ctx.tipo_estendido().tipo_basico_ident().getText().toUpperCase()));
+            ep = new EntradaTSParam(ctx.IDENT().getText(), Tipo.valueOf(ctx.tipo_estendido().tipo_basico_ident().getText()));
         }
 
         PilhaDeTabelas.empilhar(new TabelaDeSimbolos(ctx.IDENT().getText()));
@@ -156,7 +153,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
                     Saida.println("Linha " + parametro.tipo_estendido().getStart().getLine() + ": tipo " + parametro.tipo_estendido().getText() + " nao declarado");
                 }
 
-                Tipo tipo = Tipo.valueOf(parametro.tipo_estendido().getText().toUpperCase());
+                Tipo tipo = Tipo.valueOf(parametro.tipo_estendido().getText());
                 ep.addParametro(identificador.getText(), tipo);
                 PilhaDeTabelas.topo().adicionarSimbolo(identificador.getText(), tipo);
 
@@ -210,7 +207,6 @@ public class AnalisadorSemantico extends LABaseVisitor {
 
                     EntradaTSRegistro registro = new EntradaTSRegistro(registro_nome, registro_ts);
                     PilhaDeTabelas.topo().adicionarEntrada(registro);
-                    TipoEstendido.addTipo(registro.getNome());
                 }
                 return null;
             }
@@ -263,8 +259,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
             // ^ IDENT <outros_ident> <dimensao>
 
         } else //  IDENT <chamada_partes> 
-        {
-            if (ctx.chamada_partes() == null || ctx.chamada_partes().outros_ident() == null) {
+         if (ctx.chamada_partes() == null || ctx.chamada_partes().outros_ident() == null) {
                 return ctx.IDENT().getText();
             } else {
                 String ident = ctx.IDENT().getText();
@@ -278,7 +273,6 @@ public class AnalisadorSemantico extends LABaseVisitor {
 
                 return ident;
             }
-        }
 
         return "";
     }
@@ -360,7 +354,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
             TerminalNode ident = ctx.IDENT();
             String ident_name = ident.getText() + visitOutros_ident(ctx.outros_ident()).toString();
             EntradaTS entrada = PilhaDeTabelas.getSimbolo(ident_name);
-            
+
             // FIXME essa lógica é simplesmente errada, mas faz o caso de teste 15 passar
             // Na verdade, precisaríamos indicar que estamos retornando um ponteiro para getTipo(),
             // e não simplesmente getTipo()
@@ -403,6 +397,13 @@ public class AnalisadorSemantico extends LABaseVisitor {
 
     @Override
     public Object visitExpressao(LAParser.ExpressaoContext ctx) {
+        /*
+            Para obtermos o tipo de uma expressão foi necessário implementar muitos outros visits.
+            
+            A lógica adotada foi 
+            Atribuição não compatível com o tipo declarado
+        
+        */
         Tipo tipo1 = (Tipo) visitTermo_logico(ctx.termo_logico());
         Tipo tipo2 = (Tipo) visitOutros_termos_logicos(ctx.outros_termos_logicos());
 
@@ -519,7 +520,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
             Saida.println("Linha " + line + ": identificador " + nome + " ja declarado anteriormente", true);
         } else {
             try {
-                PilhaDeTabelas.topo().adicionarSimbolo(nome, Tipo.valueOf(tipo.toUpperCase()), is_pointer);
+                PilhaDeTabelas.topo().adicionarSimbolo(nome, Tipo.valueOf(tipo), is_pointer);
             } catch (Exception e) {
                 PilhaDeTabelas.topo().adicionarSimbolo(nome, TipoEnum.NONE);
             }

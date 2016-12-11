@@ -3,6 +3,10 @@ package trabalho1;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *
+ * @author Prof. Daniel Lucrédio
+ */
 public class TabelaDeSimbolos {
 
     /*
@@ -22,7 +26,8 @@ public class TabelaDeSimbolos {
     }
 
     public void adicionarSimbolo(String nome, Tipo tipo, boolean is_pointer) {
-        simbolos.add(new EntradaTS(nome, tipo, is_pointer));
+        // Flag is_pointer nunca é utilizada. Veja o comentário em EntradaTS.
+        simbolos.add(new EntradaTS(nome, tipo/*, is_pointer*/));
     }
 
     public void adicionarSimbolos(List<String> nomes, Tipo tipo) {
@@ -36,49 +41,41 @@ public class TabelaDeSimbolos {
     }
 
     public boolean existeSimbolo(String nome) {
-        for (EntradaTS etds : simbolos) {
-            String nomes[] = nome.split("\\.", 2);
-            if (etds.getNome().equals(nomes[0])) {
-                if (etds.getTipo() instanceof TipoEnum) {
-                    return nomes.length == 1;
-                } else if (etds.getTipo() instanceof TipoEstendido) {
-                    TipoEstendido tipo = (TipoEstendido) etds.getTipo();
-                    EntradaTSRegistro registro = (EntradaTSRegistro) PilhaDeTabelas.getSimbolo(tipo.tipo_estendido);
-
-                    if (nomes.length == 1) {
-                        return true;
-                    } else if (registro.existeSimbolo(nomes[1])) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+        return getSimbolo(nome) != null;
     }
 
     public EntradaTS getSimbolo(String nome) {
-        for (EntradaTS etds : simbolos) {
-            String nomes[] = nome.split("\\.", 2);
-            if (etds.getNome().equalsIgnoreCase(nomes[0])) {
-                if (etds.getTipo() instanceof TipoEnum) {
-                    if (nomes.length == 1) {
-                        return etds;
-                    }
-                    else {
-                        return null;
-                    }
-                } else if (etds.getTipo() instanceof TipoEstendido) {
-                    TipoEstendido tipo = (TipoEstendido) etds.getTipo();
-                    EntradaTSRegistro registro = (EntradaTSRegistro) PilhaDeTabelas.getSimbolo(tipo.tipo_estendido);
+        // Formato esperado de nome: IDENT ('.' IDENT)*
 
-                    if (nomes.length == 1) {
-                        return etds;
-                    } else if (registro.existeSimbolo(nomes[1])) {
-                        return registro.getTabela().getSimbolo(nomes[1]);
-                    }
+        String nomes[] = nome.split("\\.", 2);
+
+        for (EntradaTS etds : simbolos) {
+            if (!etds.getNome().equals(nomes[0])) {
+                // etds não faz parte do nome
+                continue;
+            }
+
+            if (nomes.length == 1) {
+                // Encontramos nossa entrada
+                return etds;
+            }
+
+            if (etds.getTipo() instanceof TipoEstendido) {
+                // Precisamos recuperar as informações do TipoEstendido,
+                // armazenadas em alguma tabela de símbolos da Pilha de Tabelas
+                TipoEstendido tipo = (TipoEstendido) etds.getTipo();
+                EntradaTSRegistro registro = (EntradaTSRegistro) PilhaDeTabelas.getSimbolo(tipo.tipo_estendido);
+
+                // Verificamos se nomes[1] está declarado na tabela de símbolos do registro
+                // invocando essa mesma função existeSimbolo()
+                if (nomes.length == 1) {
+                    return etds;
+                } else if (registro.existeSimbolo(nomes[1])) {
+                    return registro.getTabela().getSimbolo(nomes[1]);
                 }
             }
         }
+
         return null;
     }
 

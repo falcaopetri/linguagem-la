@@ -1,4 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Esse pom foi gerado por pura "teimosia", por meio de várias pesquisas
+    no Google.
+                
+    A ideia era automatizar o máximo possível para facilitar o desenvolvimento
+    descentralizado desse projeto. Pode-se dizer que foi um sucesso parcial.
+                
+    O Maven está responsável por baixar o Antlr 4 e executá-lo de forma apropriada
+    (visitor, listener, -package) durante o processo de build.
+    
+    Utilizando o plugin exec-maven, foi possível também fazer com que o processo de
+    execução da Main.java fosse substituído pela invocação do compilador automático
+    disponibilizado.
+                
+    Infelizmente, ainda precisamos do Antlr.jar para executar nosso próprio .jar.
+    O Maven chega a baixá-lo, mas o armazena em uma pasta própria (algo como ~/.maven).
+                
+    Acabamos adicionando as bibliotecas necessárias nas pastas corretas, e adicionando-as
+    ao versionamento do projeto.
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>br.ufscar.dc.compiladores</groupId>
@@ -107,7 +127,7 @@
                                 <argument>${basedir}/corretor/casosDeTesteT1</argument>
                                 <argument>""</argument>
                                 <!-- Opções: sintatico, semantico, gerador, tudo-->
-                                <argument>tudo</argument>
+                                <argument>gerador</argument>
                             </arguments>
                         </configuration>                        
                     </execution>

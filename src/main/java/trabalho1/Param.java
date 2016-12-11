@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package trabalho1;
 
 /**
@@ -11,6 +6,12 @@ package trabalho1;
  */
 public class Param extends EntradaTS {
 
+    /*
+        Classe auxiliar para EntradaTSParam, onde representa um argumento da
+        função/procedimento declarado.
+     */
+    // TODO Provavelmente tipo seria suficiente para o seu uso. Armazenar um nome é desnecessário.
+    // Mesmo assim podemos utilizar EntradaTS, basta um nome default.
     public Param(String nome, Tipo tipo) {
         super(nome, tipo);
     }

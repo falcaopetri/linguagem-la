@@ -5,10 +5,16 @@ import java.util.List;
 
 /**
  *
- * @author daniel
+ * @author Prof. Daniel Lucrédio
  */
 public class PilhaDeTabelas {
 
+    /*
+        Tabela de Símbolos reaproveitada de Construção de Compiladores 1.
+        Modificada conforme o necessário. De forma especial, foi transformada em
+        uma "classe estática". Assim podemos facilmente reutilizar a Tabela de 
+        Símbolos no Gerador de código.
+     */
     static private LinkedList<TabelaDeSimbolos> pilha = new LinkedList<TabelaDeSimbolos>();
 
     static public void empilhar(TabelaDeSimbolos ts) {
@@ -39,8 +45,7 @@ public class PilhaDeTabelas {
     }
 
     static public void desempilhar() {
-        TabelaDeSimbolos ret = pilha.pop();
-        // Saida.println(ret.toString());
+        pilha.pop();
     }
 
     static public List<TabelaDeSimbolos> getTodasTabelas() {

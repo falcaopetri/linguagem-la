@@ -12,34 +12,36 @@ public class Gerador extends LABaseVisitor {
 
     @Override
     public Object visitPrograma(LAParser.ProgramaContext ctx) {
-        SaidaGerador.println("#include <stdio.h>", true);
-        SaidaGerador.println("#include <stdlib.h>", true);
+        Saida.println("#include <stdio.h>", true);
+        Saida.println("#include <stdlib.h>", true);
         visitDeclaracoes(ctx.declaracoes());
-        SaidaGerador.println("int main() {", true);
+        Saida.println("int main() {", true);
         visitCorpo(ctx.corpo());
-        SaidaGerador.println("return 0;");
-        SaidaGerador.println("}", true);
+        Saida.println("return 0;");
+        Saida.println("}", true);
         return null;
     }
 
     @Override
     public Object visitVariavel(LAParser.VariavelContext ctx) {
         String tipo = (String) visitTipo(ctx.tipo());
-        SaidaGerador.println(" " + ctx.IDENT().getText(), true);
+        Saida.println(" " + ctx.IDENT().getText(), true);
         if (tipo.equals("literal")) {
-            SaidaGerador.println("[80]", true);
+            // Como estamos compilando para C, temos que transformar literal 
+            // para array de char. Tamanho 80 é utilizado nos códigos de exemplo.
+            Saida.println("[80]", true);
         } else {
             visitDimensao(ctx.dimensao());
         }
         visitMais_var(ctx.mais_var());
-        SaidaGerador.println(";", true);
+        Saida.println(";", true);
         return null;
     }
 
     @Override
     public Object visitMais_var(LAParser.Mais_varContext ctx) {
         if (ctx.IDENT() != null) {
-            SaidaGerador.println(", " + ctx.IDENT().getText(), true);
+            Saida.println(", " + ctx.IDENT().getText(), true);
         }
 
         return super.visitMais_var(ctx);
@@ -67,25 +69,25 @@ public class Gerador extends LABaseVisitor {
     @Override
     public Object visitDimensao(LAParser.DimensaoContext ctx) {
         if (ctx.exp_aritmetica() != null) {
-            SaidaGerador.println("[", true);
+            Saida.println("[", true);
             Pair<String, Tipo> par = (Pair<String, Tipo>) visitExp_aritmetica(ctx.exp_aritmetica());
-            SaidaGerador.println(par.a, true);
-            SaidaGerador.println("]", true);
+            Saida.println(par.a, true);
+            Saida.println("]", true);
         }
         return null;
     }
 
     @Override
     public Object visitTipo_basico(LAParser.Tipo_basicoContext ctx) {
-        Tipo tipo = Tipo.valueOf(ctx.getStart().getText().toUpperCase());
+        Tipo tipo = Tipo.valueOf(ctx.getStart().getText());
         if (tipo == TipoEnum.INTEIRO) {
-            SaidaGerador.println("int", true);
+            Saida.println("int", true);
         } else if (tipo == TipoEnum.LITERAL) {
-            SaidaGerador.println("char", true);
+            Saida.println("char", true);
         } else if (tipo == TipoEnum.REAL) {
-            SaidaGerador.println("float", true);
+            Saida.println("float", true);
         } else if (tipo == TipoEnum.LOGICO) {
-            SaidaGerador.println("boolean", true);
+            Saida.println("boolean", true);
         }
         return null;
 
@@ -94,89 +96,89 @@ public class Gerador extends LABaseVisitor {
     @Override
     public Object visitCmd(LAParser.CmdContext ctx) {
         if ("leia".equals(ctx.getStart().getText())) {
-            SaidaGerador.print("scanf(\"", true);
+            Saida.print("scanf(\"");
             if (ctx.identificador() != null) {
                 EntradaTS tipo = PilhaDeTabelas.getSimbolo(ctx.identificador().getText());
                 if (tipo != null) {
-                    SaidaGerador.print(returnMask(tipo.getTipo()), true);
+                    Saida.print(returnMask(tipo.getTipo()));
                     if (tipo.getTipo() == TipoEnum.LITERAL) {
-                        SaidaGerador.print("\", " + ctx.identificador().getText(), true);
+                        Saida.print("\", " + ctx.identificador().getText());
                     } else {
-                        SaidaGerador.print("\", &" + ctx.identificador().getText(), true);
+                        Saida.print("\", &" + ctx.identificador().getText());
                     }
                 }
 
             }
-            SaidaGerador.println(");", true);
+            Saida.println(");", true);
 
         } else if ("escreva".equals(ctx.getStart().getText())) {
-            SaidaGerador.print("printf(\"", true);
+            Saida.print("printf(\"");
             if (ctx.expressao() != null) {
                 Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
 
                 String stringMask = returnMask(par.b);
 
-                SaidaGerador.print(stringMask + "\" , " + par.a, true);
-                //SaidaGerador.println(returnMask(ALGUMACOISA.getTipo()), true);
+                Saida.print(stringMask + "\" , " + par.a);
+                //Saida.println(returnMask(ALGUMACOISA.getTipo()), true);
             }
-            SaidaGerador.println(");", true);
+            Saida.println(");", true);
             if (ctx.mais_expressao() != null) {
                 visitMais_expressao(ctx.mais_expressao());
             }
 
         } else if ("se".equals(ctx.getStart().getText())) {
-            SaidaGerador.println("if (", true);
+            Saida.println("if (", true);
             Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
-            SaidaGerador.println(par.a + "){", true);
+            Saida.println(par.a + "){", true);
             visitComandos(ctx.comandos());
             visitSenao_opcional(ctx.senao_opcional());
-            SaidaGerador.println("}", true);
+            Saida.println("}", true);
         } else if ("para".equals(ctx.getStart().getText())) {
             // 'para' IDENT '<-' exp_aritmetica 'ate' exp_aritmetica 'faca' comandos 'fim_para' |
-            SaidaGerador.print("for (", true);
-            SaidaGerador.print(ctx.IDENT().getText(), true);
-            SaidaGerador.print("=", true);
+            Saida.print("for (");
+            Saida.print(ctx.IDENT().getText());
+            Saida.print("=");
             Pair<String, Tipo> para_atr = (Pair<String, Tipo>) visitExp_aritmetica(ctx.para_atr);
-            SaidaGerador.print(para_atr.a, true);
+            Saida.print(para_atr.a);
             Pair<String, Tipo> para_check = (Pair<String, Tipo>) visitExp_aritmetica(ctx.para_check);
-            SaidaGerador.print(";", true);
-            SaidaGerador.print(ctx.IDENT().getText(), true);
-            SaidaGerador.print("<=", true);
-            SaidaGerador.print(para_check.a, true);
-            SaidaGerador.print(";", true);
-            SaidaGerador.print(ctx.IDENT().getText(), true);
-            SaidaGerador.println("++){", true);
+            Saida.print(";");
+            Saida.print(ctx.IDENT().getText());
+            Saida.print("<=");
+            Saida.print(para_check.a);
+            Saida.print(";");
+            Saida.print(ctx.IDENT().getText());
+            Saida.println("++){", true);
             visitComandos(ctx.comandos());
-            SaidaGerador.println("}", true);
+            Saida.println("}", true);
         } else if (ctx.atr_ponteiro != null) {
             // '^' atr_ponteiro=IDENT outros_ident dimensao '<-' expressao |
-            SaidaGerador.println("^" + ctx.atr_ponteiro.getText() + " = ", true);
+            Saida.println("^" + ctx.atr_ponteiro.getText() + " = ", true);
             Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
-            SaidaGerador.println(par.a, true);
-            SaidaGerador.println(";", true);
+            Saida.println(par.a, true);
+            Saida.println(";", true);
         } else if (ctx.atr_normal != null) {
-            SaidaGerador.println(ctx.atr_normal.getText() + " = ", true);
+            Saida.println(ctx.atr_normal.getText() + " = ", true);
             visitChamada_atribuicao(ctx.chamada_atribuicao());
         } else if ("caso".equals(ctx.getStart().getText())) {
-            SaidaGerador.println("switch(", true);
+            Saida.println("switch(", true);
             //visitexpressão
-            SaidaGerador.println(")", true);
+            Saida.println(")", true);
             //visitselecao
             //visitopcional
 
         } else if ("faca".equals(ctx.getStart().getText())) {
-            SaidaGerador.println("do {", true);
+            Saida.println("do {", true);
             visitComandos(ctx.comandos());
-            SaidaGerador.println("} while(!(", true);
+            Saida.println("} while(!(", true);
             Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
-            SaidaGerador.println(par.a + "));", true);
+            Saida.println(par.a + "));", true);
 
         } else if ("enquanto".equals(ctx.getStart().getText())) {
-            SaidaGerador.println("while(", true);
+            Saida.println("while(", true);
             Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
-            SaidaGerador.println(par.a + "){", true);
+            Saida.println(par.a + "){", true);
             visitComandos(ctx.comandos());
-            SaidaGerador.println("}", true);
+            Saida.println("}", true);
         }
 
         return null;
@@ -186,14 +188,14 @@ public class Gerador extends LABaseVisitor {
     public Object visitMais_expressao(LAParser.Mais_expressaoContext ctx) {
 
         if (ctx.expressao() != null) {
-            SaidaGerador.print("printf(\"", true);
+            Saida.print("printf(\"");
             Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
 
             String stringMask = returnMask(par.b);
 
-            SaidaGerador.print(stringMask + "\" , " + par.a, true);
-            //SaidaGerador.println(returnMask(ALGUMACOISA.getTipo()), true);
-            SaidaGerador.println(");", true);
+            Saida.print(stringMask + "\" , " + par.a);
+            //Saida.println(returnMask(ALGUMACOISA.getTipo()), true);
+            Saida.println(");", true);
         }
 
         if (ctx.mais_expressao() != null) {
@@ -205,7 +207,7 @@ public class Gerador extends LABaseVisitor {
     @Override
     public Object visitSenao_opcional(LAParser.Senao_opcionalContext ctx) {
         if (ctx.getStart().getText().equals("senao")) {
-            SaidaGerador.println("}else{", true);
+            Saida.println("}else{", true);
         }
         return super.visitSenao_opcional(ctx);
     }
@@ -214,10 +216,22 @@ public class Gerador extends LABaseVisitor {
     public Object visitChamada_atribuicao(LAParser.Chamada_atribuicaoContext ctx) {
         if (ctx.expressao() != null) {
             Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
-            SaidaGerador.println(par.a + ";", true);
+            Saida.println(par.a + ";", true);
+        } else /* if(ctx.argumentos_opcional() != null) */ {
+            Saida.print("(");
+            visitArgumentos_opcional(ctx.argumentos_opcional());
+            Saida.print(")");
         }
-        return super.visitChamada_atribuicao(ctx);
+        
+        return null;
     }
+
+    @Override
+    public Object visitArgumentos_opcional(LAParser.Argumentos_opcionalContext ctx) {
+        return super.visitArgumentos_opcional(ctx);
+    }
+    
+    
 
     public String returnMask(Tipo symbol) {
         if (symbol == TipoEnum.INTEIRO) {
@@ -291,8 +305,6 @@ public class Gerador extends LABaseVisitor {
     public Object visitTermo_logico(LAParser.Termo_logicoContext ctx) {
         //TODO NÃO IMPLEMENTA OUTROS_FATORES_LOGICOS
         Pair<String, Tipo> par = (Pair<String, Tipo>) visitFator_logico(ctx.fator_logico());
-
-        assert par != null;
 
         return par;
     }

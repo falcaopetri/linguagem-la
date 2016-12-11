@@ -62,20 +62,14 @@ public class Main {
             Gerador g = new Gerador();
             g.visitPrograma(aas);
         } catch (ParseCancellationException ex) {
-
+            // Adiciona esse output, esperado no Sintático e Semântico
+            Saida.println("Fim da compilacao", true);
         }
 
         PrintWriter outputTestCase = new PrintWriter(outputFilePath, "UTF-8");
 
-        if (Saida.is_modified()) {
-            // Output do sintático ou do semântico
-            Saida.println("Fim da compilacao", true);
-            outputTestCase.print(Saida.getTexto());
-        } else {
-            // Output do gerador de código
-            outputTestCase.print(SaidaGerador.getTexto());
-        }
-        
+        outputTestCase.print(Saida.getTexto());
+
         outputTestCase.close();
     }
 }

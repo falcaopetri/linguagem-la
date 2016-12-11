@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package trabalho1;
 
 import java.util.ArrayList;
@@ -13,6 +8,13 @@ import java.util.ArrayList;
  */
 public class EntradaTSParam extends EntradaTS {
 
+    /*
+        Representação de uma função/procedimento (não é necessário fazer distinção entre eles).
+        
+        Armazena uma lista ordenada de seus parâmetros (formais) e um tipo de retorno.
+        Exemplo de polimorfismo: não precisamos modificar nossa Tabela de Símbolos para armazenar
+        um novo tipo de EntradaTS.
+     */
     private ArrayList<Param> listaParametros;
     private Tipo returnType;
 
@@ -41,6 +43,12 @@ public class EntradaTSParam extends EntradaTS {
 
     @Override
     public boolean equals(Object obj) {
+        /*
+            Comparamos igualdade com outra EntradaTSParam.
+        
+            Regra semântica 4: Incompatibilidade entre argumentos e parâmetros formais
+            (número, ordem e tipo) na chamada de um procedimento ou uma função
+         */
 
         if (!(obj instanceof EntradaTSParam)) {
             return false;
@@ -49,11 +57,9 @@ public class EntradaTSParam extends EntradaTS {
         EntradaTSParam e1 = (EntradaTSParam) obj;
         if (this.listaParametros.size() == e1.contarParametros()) {
             for (int i = 0; i < contarParametros(); i++) {
-                // TODO nem sempre esse casting vai ser verdade
                 Tipo tipo1 = this.listaParametros.get(i).getTipo();
                 Tipo tipo2 = e1.listaParametros.get(i).getTipo();
 
-                // TODO possivelmente esse check não é o que a gente espera
                 if (!Tipo.checkFuncParameters(tipo1, tipo2)) {
                     return false;
                 }

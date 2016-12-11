@@ -1,23 +1,44 @@
 package trabalho1;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  *
  * @author petri
  */
 interface Tipo {
 
+    /*
+        Essa interface foi uma proposta do grupo para facilitar o Semântico e o 
+        Gerador, abstraindo as manipulações de tipos.
+    
+        Aqui podemos dar merge em dois tipos (de acordo com as regras semânticas 
+        e possíveis regras de casting) utilizando mergeTipos().
+        
+        Também podemos verificar se é possível "atribuir um tipo a outro" (com checkAtribuicao())
+        e se um parâmetro casa com um argumento (formal vs real) com checkFuncParameters(). 
+    
+        Essa interface permite acessar dois "tipos distintos": TipoEnum ("tipos constantes/estáticos")
+        e TipoEstendido ("tipos dinâmicos", registros).
+     */
+
     public static Tipo valueOf(String value) {
         try {
-            return TipoEnum.valueOf(value);
+            // Enums utilizam a versão UPPERCASE da string
+            return TipoEnum.valueOf(value.toUpperCase());
         } catch (Exception e) {
+            // Registros são case-sensitive
             return TipoEstendido.valueOf(value);
         }
     }
 
     public static Tipo mergeTipos(Tipo first, Tipo second) {
+        /*
+            Essa função permite dar merge em dois tipos, de acordo com a lógica
+            permitida pelo semântico. Em especial, permite saber se dois tipos
+            não dão merge, gerando nesse caso um TipoEnum.UNDEFINED.
+        
+            Ex: real merge inteiro -> real
+                inteiro merge literal -> UNDEFINED
+         */
         if ((first instanceof TipoEnum) && (second instanceof TipoEnum || second == null)) {
             return TipoEnum.mergeTipos((TipoEnum) first, (TipoEnum) second);
         } else if ((first instanceof TipoEstendido) && (second instanceof TipoEstendido || second == null)) {
@@ -60,9 +81,8 @@ interface Tipo {
 }
 
 class TipoEstendido implements Tipo {
-    // TODO mergeTipos()
 
-    private static List<TipoEstendido> tipos;
+    String tipo_estendido;
 
     static boolean checkAtribuicao(TipoEstendido first, TipoEstendido second) {
         return first.tipo_estendido.equals(second.tipo_estendido);
@@ -72,27 +92,16 @@ class TipoEstendido implements Tipo {
         return mergeTipos(first, second) != TipoEnum.UNDEFINED;
     }
 
-    String tipo_estendido;
-
-    static {
-        tipos = new ArrayList<>();
-    }
-
     public static Tipo mergeTipos(TipoEstendido first, TipoEstendido second) {
         if (second == null) {
             return first;
         }
 
-        if (first == second) {
+        if (first.equals(second)) {
             return first;
         } else {
             return TipoEnum.UNDEFINED;
         }
-    }
-
-    public static void addTipo(String tipo) {
-        // TODO flaw: tipo estendido é case insensitive!
-        tipos.add(new TipoEstendido(tipo.toUpperCase()));
     }
 
     public TipoEstendido(String tipo_estendido) {
@@ -100,10 +109,9 @@ class TipoEstendido implements Tipo {
     }
 
     public static Tipo valueOf(String value) {
-        for (TipoEstendido t : tipos) {
-            if (t.equals(value)) {
-                return t;
-            }
+        EntradaTS entrada = PilhaDeTabelas.getSimbolo(value);
+        if (entrada != null && entrada.getTipo() == TipoEnum.REGISTRO) {
+            return new TipoEstendido(entrada.getNome());
         }
 
         throw new RuntimeException("tipo " + value + " not found");
@@ -111,13 +119,15 @@ class TipoEstendido implements Tipo {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof String)) {
-            return false;
+        if (o instanceof String) {
+            String s = (String) o;
+            return this.tipo_estendido.equals(s);
+        } else if (o instanceof TipoEstendido) {
+            TipoEstendido s = (TipoEstendido) o;
+            return this.tipo_estendido.equals(s.tipo_estendido);
         }
-        String s = (String) o;
-        return this.tipo_estendido.equals(s.toUpperCase());
+        return false;
     }
-
 }
 
 enum TipoEnum implements Tipo {

@@ -8,7 +8,6 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
 
 public class MeuErrorListener implements ANTLRErrorListener {
 
@@ -28,7 +27,7 @@ public class MeuErrorListener implements ANTLRErrorListener {
         Saida.println("Linha " + i + ": erro sintatico proximo a " + text);
 
         // TODO lançando uma ParseCancellationException, poderíamos simplificar o Saida
-        // O problema é que simplficiando o Saida, afetamos os erros reports que estão na gramática
+        // O problema é que simplificando o Saida, afetamos os erros reports que estão na gramática
         // throw new ParseCancellationException();
     }
 
