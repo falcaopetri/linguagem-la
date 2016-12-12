@@ -14,7 +14,7 @@
     disponibilizado.
                 
     Infelizmente, ainda precisamos do Antlr.jar para executar nosso próprio .jar.
-    O Maven chega a baixá-lo, mas o armazena em uma pasta própria (algo como ~/.m2).
+    O Maven chega a baixá-lo, mas o armazena em uma pasta própria (algo como ~/m2).
                 
     Acabamos adicionando a biblioteca do Antlr na pasta lib/ e adicionando-as
     ao versionamento do projeto.
@@ -128,7 +128,8 @@
                                 <argument>gcc</argument>
                                 <argument>${basedir}/tmp</argument>
                                 <argument>${basedir}/corretor/casosDeTesteT1</argument>
-                                <argument>""</argument>
+                                <!-- RA's -->
+                                <argument>"586692,586765,609170,553859"</argument>
                                 <!-- Opções: sintatico, semantico, gerador, tudo-->
                                 <argument>tudo</argument>
                             </arguments>
