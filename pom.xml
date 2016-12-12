@@ -14,7 +14,7 @@
     disponibilizado.
                 
     Infelizmente, ainda precisamos do Antlr.jar para executar nosso próprio .jar.
-    O Maven chega a baixá-lo, mas o armazena em uma pasta própria (algo como ~/.maven).
+    O Maven chega a baixá-lo, mas o armazena em uma pasta própria (algo como ~/.m2).
                 
     Acabamos adicionando a biblioteca do Antlr na pasta lib/ e adicionando-as
     ao versionamento do projeto.
