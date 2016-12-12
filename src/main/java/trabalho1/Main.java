@@ -27,7 +27,7 @@ public class Main {
         String outputFilePath = args[1];
 
         // Debugging:
-        // String inputFilePath = "corretor/casosDeTesteT1/3.arquivos_sem_erros/1.entrada/15.ponteiro_impressao.alg";
+        // String inputFilePath = "corretor/casosDeTesteT1/3.arquivos_sem_erros/1.entrada/17.registro_tipo_impressao.alg";
         // String outputFilePath = "saida";
         FileReader inputTestCase = new FileReader(inputFilePath);
 

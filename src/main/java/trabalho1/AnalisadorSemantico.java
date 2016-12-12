@@ -95,7 +95,6 @@ public class AnalisadorSemantico extends LABaseVisitor {
         boolean is_pointer;
 
         if (ctx.tipo().registro() != null) {
-            // TODO
             TabelaDeSimbolos registro_ts = (TabelaDeSimbolos) visitRegistro(ctx.tipo().registro());
 
             EntradaTSRegistro registro = new EntradaTSRegistro(registro_ts.getNome(), registro_ts);
@@ -140,9 +139,12 @@ public class AnalisadorSemantico extends LABaseVisitor {
             ep = new EntradaTSParam(ctx.IDENT().getText(), Tipo.valueOf(ctx.tipo_estendido().tipo_basico_ident().getText()));
         }
 
+        // Inicia uma nova TS para o escopo da função/procedimento sendo declarado
         PilhaDeTabelas.empilhar(new TabelaDeSimbolos(ctx.IDENT().getText()));
 
         if (ctx.parametros_opcional().parametro() != null) {
+            // Lógica (possivelmente mais complexa que o necessário) para capturar
+            // os parâmetros da func/proc.
             LAParser.ParametroContext parametro = ctx.parametros_opcional().parametro();
             LAParser.Mais_identContext maisIdent = ctx.parametros_opcional().parametro().mais_ident();
             while (parametro != null) {
@@ -216,6 +218,11 @@ public class AnalisadorSemantico extends LABaseVisitor {
 
     @Override
     public Object visitRegistro(LAParser.RegistroContext ctx) {
+        /*
+            Caso o registro não seja definido com um nome, utilizaremos um nome
+            aleatório. Caso contrário, devemos modificar o seu nome no contexto
+            em que tal nome está disponível (visitDeclaracao_local()).
+         */
         String random = "random-string";
         PilhaDeTabelas.empilhar(new TabelaDeSimbolos(random));
         visitVariavel(ctx.variavel());
@@ -258,7 +265,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
         if (ctx.dimensao() != null) {
             // ^ IDENT <outros_ident> <dimensao>
 
-        } else //  IDENT <chamada_partes> 
+        } else//  IDENT <chamada_partes> 
          if (ctx.chamada_partes() == null || ctx.chamada_partes().outros_ident() == null) {
                 return ctx.IDENT().getText();
             } else {
@@ -282,7 +289,7 @@ public class AnalisadorSemantico extends LABaseVisitor {
         if (ctx.IDENT() != null) {
             TerminalNode ident = ctx.IDENT();
             String ident_name = getFullIdentifier(ctx);
-            // TODO existeSimbolo() deve percorrer registros
+
             if (!PilhaDeTabelas.existeSimbolo(ident_name)) {
                 Saida.println("Linha " + ident.getSymbol().getLine() + ": identificador " + ident_name + " nao declarado", true);
             } else if (ctx.chamada_partes() != null && ctx.chamada_partes().expressao() != null) {
@@ -290,9 +297,12 @@ public class AnalisadorSemantico extends LABaseVisitor {
                     return TipoEnum.UNDEFINED;
                 }
 
+                // Recupera func/proc da TS
                 EntradaTSParam func_proc = (EntradaTSParam) PilhaDeTabelas.getSimbolo(ident_name);
+                // Captura lista de argumentos no momento da invocação
                 ArrayList<Param> params = (ArrayList<Param>) visitChamada_partes(ctx.chamada_partes());
 
+                // Compara argumentos e parâmetros
                 if (!func_proc.equals(new EntradaTSParam("", TipoEnum.NONE, params))) {
                     Saida.println("Linha " + ident.getSymbol().getLine() + ": incompatibilidade de parametros na chamada de " + ident_name, true);
                     return TipoEnum.UNDEFINED;
@@ -400,10 +410,9 @@ public class AnalisadorSemantico extends LABaseVisitor {
         /*
             Para obtermos o tipo de uma expressão foi necessário implementar muitos outros visits.
             
-            A lógica adotada foi 
-            Atribuição não compatível com o tipo declarado
-        
-        */
+            A lógica adotada foi encapsular todas as manipulações de tipos em Tipo.
+            Isso permitiu gerar um código relativamente elegante nesses vários visit's.
+         */
         Tipo tipo1 = (Tipo) visitTermo_logico(ctx.termo_logico());
         Tipo tipo2 = (Tipo) visitOutros_termos_logicos(ctx.outros_termos_logicos());
 
@@ -510,12 +519,15 @@ public class AnalisadorSemantico extends LABaseVisitor {
     }
 
     private void tryToAddVariable(String nome, String tipo, boolean is_pointer, int line) {
+        /*
+            Adiciona Entrada na Tabela de símbolos corrente ou gera erro semântico
+         */
+
         // FIXME struct flaw: quando criando uma struct, esse método é utilizado para adicionar
         //                      variáveis à TabelaDeSimbolos topo(). Mas caso já exista uma variável
         //                      em outro escopo com esse mesmo nome, também vai gerar "identificador já declarado".
         //                      Isso deveria ocorrer só se já existe dentro do mesmo escopo, um comportamento diferente
         //                      do padrão
-
         if (PilhaDeTabelas.existeSimbolo(nome)) {
             Saida.println("Linha " + line + ": identificador " + nome + " ja declarado anteriormente", true);
         } else {
@@ -528,7 +540,10 @@ public class AnalisadorSemantico extends LABaseVisitor {
     }
 
     private void assert_does_not_return(LAParser.ComandosContext comandos) {
-        // TODO comments
+        /*
+            Percorre lista de comandos e gera erro (semântico) quando encontra
+            um comando de retorno.
+         */
 
         while (comandos != null) {
             LAParser.CmdContext cmd = comandos.cmd();
@@ -542,6 +557,9 @@ public class AnalisadorSemantico extends LABaseVisitor {
     }
 
     private void tryToAddFunc(EntradaTS entrada, int line) {
+        /*
+            Adiciona Entrada na Tabela de símbolos corrente ou gera erro semântico
+         */
         if (PilhaDeTabelas.existeSimbolo(entrada.getNome())) {
             Saida.println("Linha " + line + ": identificador " + entrada.getNome() + " ja declarado anteriormente", true);
         } else {

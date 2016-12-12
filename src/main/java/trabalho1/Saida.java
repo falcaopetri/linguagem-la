@@ -28,7 +28,7 @@ public class Saida {
     }
 
     public static void print(String txt) {
-        texto.append(txt).append("");
+        texto.append(txt);
     }
 
     public static boolean is_modified() {
