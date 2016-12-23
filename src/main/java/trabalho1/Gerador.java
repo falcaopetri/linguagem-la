@@ -262,15 +262,6 @@ public class Gerador extends LABaseVisitor {
 
     @Override
     public Object visitRegistro(LAParser.RegistroContext ctx) {
-        // Nome aleatório para um registro declarado sem nome
-        // TODO registros com nome não estão funcionando por um problema na hora da escolha da implementação:
-        // Alguns visit's retornam uma string equivalente ao código gerado por aquele nó,
-        // outros imprimem diretamente dentro de seus corpos (e de seus filhos).
-        // Houve alguma refatoração para tender à primeira opção (retornar o código)
-        // mas muita coisa ainda imprime o código diretamente, como é o caso do Registro.
-        // Assim fica bem difícil (senão impossível) declarar um registro com nome.
-        // Mesmo usando typedef para aproveitar o nome random dado, a distância entre o nó em
-        // que o nome do registro está armazenada e esse é de pelo menos 2.
         String random = "random_string";
         String out = "struct " + random + " {\n"
                 + (String) visitVariavel(ctx.variavel());
