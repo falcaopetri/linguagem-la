@@ -143,8 +143,15 @@ public class Gerador extends LABaseVisitor {
         String out = "";
         if (ctx.variavel() != null) {
             out = (String) visitVariavel(ctx.variavel());
-        } // TODO constante
-        else if (ctx.tipo() != null) {
+        } else if (ctx.tipo_basico() != null) {
+            out = "const "
+                    + (String) visitTipo_basico(ctx.tipo_basico())
+                    + " "
+                    + ctx.IDENT().getText()
+                    + " = "
+                    + (String) visitValor_constante(ctx.valor_constante())
+                    + ";\n";
+        } else if (ctx.tipo() != null) {
             out = "typedef "
                     + visitTipo(ctx.tipo())
                     + " "
@@ -153,6 +160,12 @@ public class Gerador extends LABaseVisitor {
         }
 
         return out;
+    }
+
+    @Override
+    public Object visitValor_constante(LAParser.Valor_constanteContext ctx) {
+        // 17. <valor_constante> ::= CADEIA | NUM_INT | NUM_REAL | verdadeiro | falso
+        return ctx.getText();
     }
 
     @Override
@@ -360,6 +373,7 @@ public class Gerador extends LABaseVisitor {
             Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
             out += par.a + "){\n";
             out += (String) visitComandos(ctx.comandos());
+            out += "} else {";
             out += (String) visitSenao_opcional(ctx.senao_opcional());
             out += "}\n";
         } else if ("para".equals(ctx.getStart().getText())) {
@@ -430,12 +444,16 @@ public class Gerador extends LABaseVisitor {
                 out = entrada_nome + " = " + chamada.b + ";\n";
             }
         } else if ("caso".equals(ctx.getStart().getText())) {
-            out = "switch(";
-            //visitexpressão
-            out += ")";
-            //visitselecao
-            //visitopcional
-
+            // caso <exp_aritmetica> seja <selecao> <senao_opcional> fim_caso
+            Pair<String, Tipo> par = (Pair<String, Tipo>) visitExp_aritmetica(ctx.exp_switch);
+            out = "switch("
+                    + par.a
+                    + "){\n"
+                    + (String) visitSelecao(ctx.selecao())
+                    + "default:\n"
+                    + (String) visitSenao_opcional(ctx.senao_opcional())
+                    + "break;\n"
+                    + "}\n";
         } else if ("faca".equals(ctx.getStart().getText())) {
             Pair<String, Tipo> par = (Pair<String, Tipo>) visitExpressao(ctx.expressao());
             out = "do {\n"
@@ -455,6 +473,88 @@ public class Gerador extends LABaseVisitor {
         }
 
         return out;
+    }
+
+    @Override
+    public Object visitSelecao(LAParser.SelecaoContext ctx) {
+        // 32. <selecao> ::= <constantes> : <comandos> <mais_selecao>
+        String out = (String) visitConstantes(ctx.constantes())
+                + (String) visitComandos(ctx.comandos())
+                + "break;\n"
+                + (String) visitMais_selecao(ctx.mais_selecao());
+
+        return out;
+    }
+
+    @Override
+    public Object visitConstantes(LAParser.ConstantesContext ctx) {
+        // 34. <constantes> ::= <numero_intervalo> <mais_constantes>
+        String out = (String) visitNumero_intervalo(ctx.numero_intervalo());
+        out += (String) visitMais_constantes(ctx.mais_constantes());
+        return out;
+    }
+
+    @Override
+    public Object visitMais_constantes(LAParser.Mais_constantesContext ctx) {
+        // 35. <mais_constantes> ::= , <constantes> | ε
+        String out = "";
+        if (ctx.constantes() != null) {
+            out = "," + (String) visitConstantes(ctx.constantes());
+        }
+        return out;
+    }
+
+    @Override
+    public Object visitMais_selecao(LAParser.Mais_selecaoContext ctx) {
+        // 33. <mais_selecao> ::= <selecao> | ε
+        String out = "";
+        if (ctx.selecao() != null) {
+            out = (String) visitSelecao(ctx.selecao());
+        }
+        return out;
+    }
+
+    @Override
+    public Object visitNumero_intervalo(LAParser.Numero_intervaloContext ctx) {
+        // 36. <numero_intervalo> ::= <op_unario> NUM_INT <intervalo_opcional>
+        String op_unario = (String) visitOp_unario(ctx.op_unario());
+        String num_int = ctx.NUM_INT().getText();
+        String intervalo_op = (String) visitIntervalo_opcional(ctx.intervalo_opcional());
+        int lower = Integer.parseInt(op_unario + num_int);
+
+        int upper;
+        if (intervalo_op.length() != 0) {
+            upper = Integer.parseInt(intervalo_op);
+        } else {
+            upper = lower;
+        }
+        int tmp = lower;
+        lower = Math.min(tmp, upper);
+        upper = Math.max(tmp, upper);
+        String out = "";
+        for (int i = lower; i <= upper; ++i) {
+            out += "case " + i + ":\n";
+        }
+
+        return out;
+    }
+
+    @Override
+    public Object visitIntervalo_opcional(LAParser.Intervalo_opcionalContext ctx) {
+        // 37. <intervalo_opcional> ::= .. <op_unario> NUM_INT | ε
+        String out = "";
+        if (ctx.op_unario() != null) {
+            out = (String) visitOp_unario(ctx.op_unario())
+                    + ctx.NUM_INT().getText();
+        }
+
+        return out;
+    }
+
+    @Override
+    public Object visitOp_unario(LAParser.Op_unarioContext ctx) {
+        // 38. <op_unario> ::= - | ε
+        return ctx.getText();
     }
 
     @Override
@@ -478,8 +578,7 @@ public class Gerador extends LABaseVisitor {
         // 29. <senao_opcional> ::= senao <comandos> | ε
         String out = "";
         if (ctx.comandos() != null) {
-            out = "} else {"
-                    + (String) visitComandos(ctx.comandos());
+            out = (String) visitComandos(ctx.comandos());
         }
         return out;
     }
