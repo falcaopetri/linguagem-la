@@ -11,7 +11,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 
 public class Main {
-
+    
     public static void main(String[] args) throws IOException {
         /*
             Main permite dois tipos de execução:
@@ -30,46 +30,47 @@ public class Main {
         // String inputFilePath = "corretor/casosDeTesteT1/3.arquivos_sem_erros/1.entrada/17.registro_tipo_impressao.alg";
         // String outputFilePath = "saida";
         FileReader inputTestCase = new FileReader(inputFilePath);
-
+        
         ANTLRInputStream input = new ANTLRInputStream(inputTestCase);
         LALexer lexer = new LALexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         LAParser parser = new LAParser(tokens);
-
+        
         MeuErrorListener mel = new MeuErrorListener();
-
+        
         lexer.removeErrorListeners();
         parser.removeErrorListeners();
-
+        
         parser.addErrorListener(mel);
-
+        
         try {
             ProgramaContext aas = parser.programa();
-
+            
             if (Saida.is_modified()) {
                 // Força lançamento de exceção quando ocorrido algum erro léxico/sintático
                 throw new ParseCancellationException("Exceção gerada no léxico/sintático.");
             }
-
+            
             AnalisadorSemantico as = new AnalisadorSemantico();
             as.visitPrograma(aas);
-
+            
             if (Saida.is_modified()) {
                 // Força lançamento de exceção quando ocorrido algum erro semântico
                 throw new ParseCancellationException("Exceção gerada no semântico.");
             }
-
+            
             Gerador g = new Gerador();
-            g.visitPrograma(aas);
+            String out = (String) g.visitPrograma(aas);
+            Saida.print(out);
         } catch (ParseCancellationException ex) {
             // Adiciona esse output, esperado no Sintático e Semântico
             Saida.println("Fim da compilacao", true);
         }
-
+        
         PrintWriter outputTestCase = new PrintWriter(outputFilePath, "UTF-8");
-
+        
         outputTestCase.print(Saida.getTexto());
-
+        
         outputTestCase.close();
     }
 }
