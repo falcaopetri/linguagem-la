@@ -143,8 +143,14 @@ public class Gerador extends LABaseVisitor {
         String out = "";
         if (ctx.variavel() != null) {
             out = (String) visitVariavel(ctx.variavel());
+        } // TODO constante
+        else if (ctx.tipo() != null) {
+            out = "typedef "
+                    + visitTipo(ctx.tipo())
+                    + " "
+                    + ctx.IDENT().getText()
+                    + ";\n";
         }
-        // TODO constante e tipo
 
         return out;
     }
